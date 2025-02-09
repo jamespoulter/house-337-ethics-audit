@@ -1,7 +1,8 @@
-import "@/styles/globals.css"
+import "./globals.css"
 import { Inter } from "next/font/google"
 import Link from "next/link"
 import { Toaster } from "@/components/ui/toaster"
+import { ThemeProvider } from "@/components/theme-provider"
 import type React from "react"
 
 const inter = Inter({ subsets: ["latin"] })
@@ -17,43 +18,46 @@ export default function RootLayout({
   children: React.ReactNode
 }) {
   return (
-    <html lang="en" className={inter.className}>
-      <body className="bg-gray-100">
-        <div className="min-h-screen flex flex-col">
-          <header className="bg-white shadow-sm">
-            <nav className="container mx-auto px-4 py-4 flex justify-between items-center">
-              <Link href="/" className="text-2xl font-bold">
-                Ecclesiai AI Ethics Audit
-              </Link>
-              <div className="flex space-x-4">
-                <Link href="/dashboard" className="text-blue-600 hover:text-blue-800">
-                  Dashboard
+    <html lang="en" suppressHydrationWarning>
+      <body className={inter.className}>
+        <ThemeProvider
+          attribute="class"
+          defaultTheme="system"
+          enableSystem
+          disableTransitionOnChange
+        >
+          <div className="min-h-screen flex flex-col">
+            <header className="bg-card border-b">
+              <nav className="container mx-auto px-4 py-4 flex justify-between items-center">
+                <Link href="/" className="text-2xl font-bold">
+                  Ecclesiai AI Ethics Audit
                 </Link>
-                <Link href="/audits" className="text-blue-600 hover:text-blue-800">
-                  Audits
-                </Link>
-                <Link href="/reports" className="text-blue-600 hover:text-blue-800">
-                  Reports
-                </Link>
-                <Link href="/settings" className="text-blue-600 hover:text-blue-800">
-                  Settings
-                </Link>
+                <div className="flex space-x-6">
+                  <Link href="/dashboard" className="text-muted-foreground hover:text-primary transition-colors">
+                    Dashboard
+                  </Link>
+                  <Link href="/audits" className="text-muted-foreground hover:text-primary transition-colors">
+                    Audits
+                  </Link>
+                  <Link href="/reports" className="text-muted-foreground hover:text-primary transition-colors">
+                    Reports
+                  </Link>
+                  <Link href="/settings" className="text-muted-foreground hover:text-primary transition-colors">
+                    Settings
+                  </Link>
+                </div>
+              </nav>
+            </header>
+            <main className="flex-grow">{children}</main>
+            <footer className="bg-card border-t">
+              <div className="container mx-auto px-4 py-4 text-center text-sm text-muted-foreground">
+                &copy; 2024 Ecclesiai. All rights reserved.
               </div>
-            </nav>
-          </header>
-          <main className="flex-grow container mx-auto px-4 py-8">{children}</main>
-          <footer className="bg-white border-t">
-            <div className="container mx-auto px-4 py-4 text-center text-sm text-gray-600">
-              &copy; 2023 Ecclesiai. All rights reserved.
-            </div>
-          </footer>
-        </div>
-        <Toaster />
+            </footer>
+          </div>
+          <Toaster />
+        </ThemeProvider>
       </body>
     </html>
   )
 }
-
-
-
-import './globals.css'
