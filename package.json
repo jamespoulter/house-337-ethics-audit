@@ -1,6 +1,7 @@
 {
-  "name": "my-v0-project",
+  "name": "house-337-ethics-audit",
   "version": "0.1.0",
+  "description": "Ethics Audit Application for House 337",
   "private": true,
   "scripts": {
     "dev": "next dev",
