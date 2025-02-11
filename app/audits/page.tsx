@@ -72,61 +72,63 @@ export default function Audits() {
   }
 
   return (
-    <div>
-      <div className="flex justify-between items-center mb-6">
-        <h1 className="text-3xl font-bold">AI Ethics Audits</h1>
-        <Button asChild>
+    <div className="container mx-auto px-4 py-8 max-w-7xl">
+      <div className="flex justify-between items-center mb-8">
+        <h1 className="text-4xl font-bold tracking-tight">AI Ethics Audits</h1>
+        <Button asChild size="lg">
           <Link href="/audits/new">Start New Audit</Link>
         </Button>
       </div>
 
       {audits.length === 0 ? (
-        <div className="text-center py-12">
-          <h3 className="text-lg font-medium text-gray-900 mb-2">No audits found</h3>
-          <p className="text-gray-500 mb-4">Get started by creating your first AI ethics audit.</p>
-          <Button asChild>
+        <div className="text-center py-16 bg-muted/40 rounded-lg border">
+          <h3 className="text-xl font-medium text-gray-900 mb-3">No audits found</h3>
+          <p className="text-gray-500 mb-6">Get started by creating your first AI ethics audit.</p>
+          <Button asChild size="lg">
             <Link href="/audits/new">Create New Audit</Link>
           </Button>
         </div>
       ) : (
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead>Audit Name</TableHead>
-              <TableHead>Organization</TableHead>
-              <TableHead>Status</TableHead>
-              <TableHead>Overall Score</TableHead>
-              <TableHead>Actions</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {audits.map((audit) => (
-              <TableRow key={audit.id}>
-                <TableCell className="font-medium">{audit.name}</TableCell>
-                <TableCell>{audit.organization}</TableCell>
-                <TableCell>
-                  <Badge variant={audit.status === "Completed" ? "default" : "secondary"}>
-                    {audit.status}
-                  </Badge>
-                </TableCell>
-                <TableCell>
-                  {audit.overall_score ? (
-                    <Badge className={getScoreColor(audit.overall_score)}>
-                      {audit.overall_score}%
-                    </Badge>
-                  ) : (
-                    <Badge variant="outline">Not scored</Badge>
-                  )}
-                </TableCell>
-                <TableCell>
-                  <Button variant="outline" size="sm" asChild>
-                    <Link href={`/audits/${audit.id}`}>View Details</Link>
-                  </Button>
-                </TableCell>
+        <div className="rounded-lg border bg-card">
+          <Table>
+            <TableHeader>
+              <TableRow className="hover:bg-muted/50">
+                <TableHead className="font-semibold">Audit Name</TableHead>
+                <TableHead className="font-semibold">Organization</TableHead>
+                <TableHead className="font-semibold">Status</TableHead>
+                <TableHead className="font-semibold">Overall Score</TableHead>
+                <TableHead className="font-semibold text-right">Actions</TableHead>
               </TableRow>
-            ))}
-          </TableBody>
-        </Table>
+            </TableHeader>
+            <TableBody>
+              {audits.map((audit) => (
+                <TableRow key={audit.id} className="hover:bg-muted/50">
+                  <TableCell className="font-medium">{audit.name}</TableCell>
+                  <TableCell>{audit.organization}</TableCell>
+                  <TableCell>
+                    <Badge variant={audit.status === "Completed" ? "default" : "secondary"}>
+                      {audit.status}
+                    </Badge>
+                  </TableCell>
+                  <TableCell>
+                    {audit.overall_score ? (
+                      <Badge className={getScoreColor(audit.overall_score)}>
+                        {audit.overall_score}%
+                      </Badge>
+                    ) : (
+                      <Badge variant="outline">Not scored</Badge>
+                    )}
+                  </TableCell>
+                  <TableCell className="text-right">
+                    <Button variant="outline" size="sm" asChild>
+                      <Link href={`/audits/${audit.id}`}>View Details</Link>
+                    </Button>
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </div>
       )}
     </div>
   )

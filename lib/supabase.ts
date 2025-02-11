@@ -1,4 +1,5 @@
 import { createClient } from '@supabase/supabase-js'
+import { Database } from '@/types/supabase'
 import { 
   Audit, 
   EthicalAssessmentCategory, 
@@ -15,7 +16,8 @@ if (!supabaseUrl || !supabaseAnonKey) {
   throw new Error('Missing Supabase environment variables')
 }
 
-export const supabase = createClient(supabaseUrl, supabaseAnonKey)
+// Create a Supabase client
+export const supabase = createClient<Database>(supabaseUrl, supabaseAnonKey)
 
 // Error handling helper
 const handleSupabaseError = (error: any) => {
@@ -29,15 +31,37 @@ const handleSupabaseError = (error: any) => {
 // Audit functions
 export async function getAudits() {
   try {
-    const { data, error } = await supabase
+    console.log('Fetching audits from Supabase...')
+    
+    const { data, error, status, statusText, count } = await supabase
       .from('audits')
-      .select('*')
+      .select('*', { count: 'exact' })
       .order('created_at', { ascending: false })
 
-    if (error) throw error
+    if (error) {
+      console.error('Supabase error fetching audits:', {
+        error,
+        status,
+        statusText
+      })
+      throw error
+    }
+
+    console.log('Supabase response:', {
+      status,
+      statusText,
+      totalCount: count,
+      rowCount: data?.length || 0,
+      data
+    })
+
     return data as Audit[]
   } catch (error) {
-    handleSupabaseError(error)
+    console.error('Error in getAudits:', error)
+    if (error instanceof Error) {
+      throw new Error(error.message)
+    }
+    throw new Error('An unexpected database error occurred')
   }
 }
 
@@ -86,7 +110,7 @@ export async function getAuditById(id: string): Promise<AuditWithDetails | null>
       staff_interviews: interviews,
     } as AuditWithDetails
   } catch (error) {
-    handleSupabaseError(error)
+    console.error('Error in getAuditById:', error)
     return null
   }
 }
@@ -102,7 +126,8 @@ export async function createAudit(auditData: Partial<Audit>) {
     if (error) throw error
     return data as Audit
   } catch (error) {
-    handleSupabaseError(error)
+    console.error('Error in createAudit:', error)
+    throw error
   }
 }
 
@@ -121,7 +146,7 @@ export async function updateAudit(id: string, audit: Partial<Audit>) {
     if (error) throw error
     return data
   } catch (error) {
-    handleSupabaseError(error)
+    console.error('Error in updateAudit:', error)
     throw error
   }
 }
@@ -136,7 +161,7 @@ export async function deleteAudit(id: string) {
     if (error) throw error
     return { success: true }
   } catch (error) {
-    handleSupabaseError(error)
+    console.error('Error in deleteAudit:', error)
     return { success: false, error }
   }
 }

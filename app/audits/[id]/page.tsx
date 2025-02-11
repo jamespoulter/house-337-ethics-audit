@@ -22,6 +22,7 @@ import { getAuditById, updateAudit } from "@/lib/supabase"
 import { AuditWithDetails, EthicalAssessmentCategory, EthicalAssessmentResponse } from "@/lib/types"
 import { useUnsavedChanges } from "@/hooks/use-unsaved-changes"
 import debounce from "lodash/debounce"
+import { Badge } from "@/components/ui/badge"
 
 interface Question {
   id: string
@@ -336,12 +337,12 @@ export default function AuditDetail() {
   return (
     <div className="flex h-screen overflow-hidden bg-background">
       {/* Sidebar */}
-      <div className="w-72 border-r bg-muted/40">
-        <div className="flex h-16 items-center border-b px-6">
-          <h2 className="text-lg font-semibold">Audit Navigation</h2>
+      <div className="w-80 border-r bg-card">
+        <div className="flex h-16 items-center justify-between border-b px-6">
+          <h2 className="text-lg font-semibold tracking-tight">Audit Navigation</h2>
         </div>
-        <ScrollArea className="h-[calc(100vh-4rem)] px-3 py-4">
-          <div className="space-y-1.5">
+        <ScrollArea className="h-[calc(100vh-4rem)] px-4 py-6">
+          <div className="space-y-2">
             {navigationItems.map((item) => {
               const Icon = item.icon
               return (
@@ -349,18 +350,20 @@ export default function AuditDetail() {
                   key={item.id}
                   onClick={() => setActiveTab(item.id)}
                   className={cn(
-                    "w-full flex items-center gap-3 rounded-lg px-4 py-2.5 text-sm font-medium transition-colors",
+                    "w-full flex items-center gap-3 rounded-lg px-4 py-3 text-sm font-medium transition-all hover:bg-accent",
                     activeTab === item.id
                       ? "bg-primary text-primary-foreground shadow-sm"
-                      : "text-muted-foreground hover:bg-muted hover:text-primary"
+                      : "text-muted-foreground hover:text-foreground"
                   )}
                 >
-                  <Icon className="h-4.5 w-4.5" />
+                  <Icon className="h-5 w-5 shrink-0" />
                   <span>{item.label}</span>
-                  <ChevronRight className={cn(
-                    "ml-auto h-4 w-4 transition-transform",
-                    activeTab === item.id ? "rotate-90" : ""
-                  )} />
+                  <ChevronRight 
+                    className={cn(
+                      "ml-auto h-4 w-4 shrink-0 transition-transform duration-200",
+                      activeTab === item.id ? "rotate-90 text-primary-foreground" : "text-muted-foreground"
+                    )} 
+                  />
                 </button>
               )
             })}
@@ -370,43 +373,51 @@ export default function AuditDetail() {
 
       {/* Main Content */}
       <div className="flex-1 overflow-hidden">
-        <div className="flex h-16 items-center justify-between border-b px-8">
-          <h1 className="text-xl font-semibold">AI Ethics Audit for {audit.name}</h1>
-          <div className="flex items-center gap-6">
-            <div className="flex flex-col items-end">
-              <span className="text-sm text-muted-foreground mb-1">Overall Ethics Score</span>
-              <span className={cn(
-                "px-4 py-1.5 rounded-full text-sm font-semibold",
-                audit.overall_score >= 90 ? "bg-green-100 text-green-700" :
-                audit.overall_score >= 70 ? "bg-yellow-100 text-yellow-700" :
-                "bg-red-100 text-red-700"
-              )}>
-                {audit.overall_score || 0}%
-              </span>
-            </div>
+        <div className="flex h-16 items-center justify-between border-b bg-card/50">
+          <div className="max-w-7xl w-full mx-auto px-8 flex items-center justify-between">
             <div className="flex items-center gap-4">
-              <Button 
-                onClick={handleManualSave} 
-                disabled={isSaving || !hasUnsavedChanges}
-                className="min-w-[100px]"
-              >
-                {isSaving ? (
-                  <>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    Saving...
-                  </>
-                ) : (
-                  <>
-                    <Save className="mr-2 h-4 w-4" />
-                    Save Audit
-                  </>
+              <h1 className="text-xl font-semibold tracking-tight">AI Ethics Audit for {audit.name ?? 'Untitled'}</h1>
+              <Badge variant="outline" className="font-medium">
+                {audit.status ?? 'In Progress'}
+              </Badge>
+            </div>
+            <div className="flex items-center gap-8">
+              <div className="flex flex-col items-end">
+                <span className="text-sm text-muted-foreground">Overall Ethics Score</span>
+                <span className={cn(
+                  "mt-1 px-3 py-1 rounded-full text-sm font-medium",
+                  (audit.overall_score ?? 0) >= 90 ? "bg-green-100 text-green-700" :
+                  (audit.overall_score ?? 0) >= 70 ? "bg-yellow-100 text-yellow-700" :
+                  "bg-red-100 text-red-700"
+                )}>
+                  {audit.overall_score ?? 0}%
+                </span>
+              </div>
+              <div className="flex items-center gap-4">
+                <Button 
+                  onClick={handleManualSave} 
+                  disabled={isSaving || !hasUnsavedChanges}
+                  className="min-w-[120px]"
+                  variant={hasUnsavedChanges ? "default" : "outline"}
+                >
+                  {isSaving ? (
+                    <>
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      Saving...
+                    </>
+                  ) : (
+                    <>
+                      <Save className="mr-2 h-4 w-4" />
+                      {hasUnsavedChanges ? "Save Changes" : "Saved"}
+                    </>
+                  )}
+                </Button>
+                {lastSaved && (
+                  <p className="text-sm text-muted-foreground whitespace-nowrap">
+                    Last saved: {lastSaved.toLocaleTimeString()}
+                  </p>
                 )}
-              </Button>
-              {lastSaved && (
-                <p className="text-sm text-muted-foreground">
-                  Last saved: {lastSaved.toLocaleTimeString()}
-                </p>
-              )}
+              </div>
             </div>
           </div>
         </div>
@@ -438,7 +449,7 @@ export default function AuditDetail() {
                       <Textarea
                         id="description"
                         name="description"
-                        value={audit.description}
+                        value={audit.description ?? ''}
                         onChange={handleInputChange}
                         className="mt-2 min-h-[120px]"
                       />
@@ -490,6 +501,7 @@ export default function AuditDetail() {
                       </CardHeader>
                       <CardContent className="p-6 bg-card/50">
                         <Questionnaire
+                          categoryId={category}
                           questions={questions}
                           answers={auditCategory.questions}
                           onAnswerChange={(id, value) => handleQuestionnaireChange(category, id, value)}
@@ -515,9 +527,9 @@ export default function AuditDetail() {
                   </CardHeader>
                   <CardContent>
                     <Textarea
-                      id="ethicalFramework"
-                      name="ethicalFramework"
-                      value={audit.ethicalFramework}
+                      id="ethical_framework"
+                      name="ethical_framework"
+                      value={audit.ethical_framework ?? ''}
                       onChange={handleInputChange}
                       className="min-h-[150px]"
                     />
@@ -533,9 +545,9 @@ export default function AuditDetail() {
                   </CardHeader>
                   <CardContent>
                     <Textarea
-                      id="risksAndChallenges"
-                      name="risksAndChallenges"
-                      value={audit.risksAndChallenges}
+                      id="risks_and_challenges"
+                      name="risks_and_challenges"
+                      value={audit.risks_and_challenges ?? ''}
                       onChange={handleInputChange}
                       className="min-h-[150px]"
                     />
@@ -551,9 +563,9 @@ export default function AuditDetail() {
                   </CardHeader>
                   <CardContent>
                     <Textarea
-                      id="mitigationStrategies"
-                      name="mitigationStrategies"
-                      value={audit.mitigationStrategies}
+                      id="mitigation_strategies"
+                      name="mitigation_strategies"
+                      value={audit.mitigation_strategies ?? ''}
                       onChange={handleInputChange}
                       className="min-h-[150px]"
                     />
@@ -569,9 +581,9 @@ export default function AuditDetail() {
                   </CardHeader>
                   <CardContent>
                     <Textarea
-                      id="continuousMonitoring"
-                      name="continuousMonitoring"
-                      value={audit.continuousMonitoring}
+                      id="continuous_monitoring"
+                      name="continuous_monitoring"
+                      value={audit.continuous_monitoring ?? ''}
                       onChange={handleInputChange}
                       className="min-h-[150px]"
                     />

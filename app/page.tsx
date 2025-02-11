@@ -48,7 +48,7 @@ export default function Home() {
       </section>
 
       {/* Features Section */}
-      <section className="py-16 lg:py-24 bg-gray-50">
+      <section className="py-16 lg:py-24 bg-gray-50 border-t border-gray-100">
         <div className="max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid gap-12 lg:gap-24">
             <div className="text-center space-y-4">
@@ -99,7 +99,7 @@ export default function Home() {
       </section>
 
       {/* Process Section */}
-      <section className="py-16 lg:py-24 bg-white">
+      <section className="py-16 lg:py-24 bg-white border-t border-gray-100">
         <div className="max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid gap-12 lg:gap-24">
             <div className="text-center space-y-4">
@@ -147,14 +147,14 @@ export default function Home() {
       </section>
 
       {/* CTA Section */}
-      <section className="py-16 lg:py-24 bg-black">
+      <section className="py-16 lg:py-24 bg-white">
         <div className="max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex flex-col items-center space-y-8 text-center">
             <div className="space-y-4">
-              <h2 className="text-3xl font-bold tracking-tighter sm:text-4xl md:text-5xl text-white">
+              <h2 className="text-3xl font-bold tracking-tighter sm:text-4xl md:text-5xl text-black">
                 Start Your AI Ethics Journey Today
               </h2>
-              <p className="mx-auto max-w-[600px] text-gray-400 md:text-lg">
+              <p className="mx-auto max-w-[600px] text-gray-600 md:text-lg">
                 Join leading organizations in ensuring ethical AI development and deployment.
               </p>
             </div>

@@ -4,6 +4,7 @@ import Link from "next/link"
 import Image from "next/image"
 import { Toaster } from "@/components/ui/toaster"
 import { ThemeProvider } from "@/components/theme-provider"
+import { UserProfileMenu } from "@/components/user-profile-menu"
 import type React from "react"
 
 const inter = Inter({ subsets: ["latin"] })
@@ -28,30 +29,30 @@ export default function RootLayout({
           disableTransitionOnChange
         >
           <div className="min-h-screen flex flex-col bg-white">
-            <header className="bg-white border-b border-gray-100">
+            <header className="bg-black border-b border-gray-800">
               <nav className="container mx-auto px-4 py-4 flex justify-between items-center">
                 <Link href="/" className="flex items-center space-x-2">
                   <Image 
-                    src="/images/logo.jpg"
+                    src="/images/House_Word_logo.png"
                     alt="House 337"
-                    width={40}
-                    height={40}
+                    width={120}
+                    height={36}
                   />
-                  <span className="text-xl font-bold text-black">AI Ethics Audit</span>
                 </Link>
-                <div className="flex space-x-6">
-                  <Link href="/dashboard" className="text-gray-600 hover:text-[#FF0055] transition-colors">
+                <div className="flex items-center space-x-6">
+                  <Link href="/dashboard" className="text-white hover:text-[#FF0055] transition-colors">
                     Dashboard
                   </Link>
-                  <Link href="/audits" className="text-gray-600 hover:text-[#FF0055] transition-colors">
+                  <Link href="/audits" className="text-white hover:text-[#FF0055] transition-colors">
                     Audits
                   </Link>
-                  <Link href="/reports" className="text-gray-600 hover:text-[#FF0055] transition-colors">
+                  <Link href="/reports" className="text-white hover:text-[#FF0055] transition-colors">
                     Reports
                   </Link>
-                  <Link href="/settings" className="text-gray-600 hover:text-[#FF0055] transition-colors">
+                  <Link href="/settings" className="text-white hover:text-[#FF0055] transition-colors">
                     Settings
                   </Link>
+                  <UserProfileMenu />
                 </div>
               </nav>
             </header>
