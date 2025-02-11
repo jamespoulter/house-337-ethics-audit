@@ -5,9 +5,7 @@ import {
   EthicalAssessmentResponse,
   StaffInterview,
   RACIMatrix,
-  AuditWithDetails,
-  AuditSection,
-  AuditQuestion
+  AuditWithDetails
 } from '@/lib/types'
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
@@ -18,27 +16,6 @@ if (!supabaseUrl || !supabaseAnonKey) {
 }
 
 export const supabase = createClient(supabaseUrl, supabaseAnonKey)
-
-// Local types for sections and questions
-type AuditSection = {
-  id: string
-  audit_id: string
-  name: string
-  status: string
-  score: number | null
-  created_at: string
-  updated_at: string
-}
-
-type AuditQuestion = {
-  id: string
-  section_id: string
-  question: string
-  answer: string | null
-  score: number | null
-  created_at: string
-  updated_at: string
-}
 
 // Error handling helper
 const handleSupabaseError = (error: any) => {
@@ -161,70 +138,6 @@ export async function deleteAudit(id: string) {
   } catch (error) {
     handleSupabaseError(error)
     return { success: false, error }
-  }
-}
-
-// Section functions
-export async function createSection(section: Omit<AuditSection, 'id' | 'created_at' | 'updated_at'>) {
-  try {
-    const { data, error } = await supabase
-      .from('audit_sections')
-      .insert([section])
-      .select()
-      .single()
-
-    if (error) throw error
-    return data
-  } catch (error) {
-    handleSupabaseError(error)
-  }
-}
-
-export async function updateSection(id: string, section: Partial<AuditSection>) {
-  try {
-    const { data, error } = await supabase
-      .from('audit_sections')
-      .update(section)
-      .eq('id', id)
-      .select()
-      .single()
-
-    if (error) throw error
-    return data
-  } catch (error) {
-    handleSupabaseError(error)
-  }
-}
-
-// Question functions
-export async function createQuestion(question: Omit<AuditQuestion, 'id' | 'created_at' | 'updated_at'>) {
-  try {
-    const { data, error } = await supabase
-      .from('audit_questions')
-      .insert([question])
-      .select()
-      .single()
-
-    if (error) throw error
-    return data
-  } catch (error) {
-    handleSupabaseError(error)
-  }
-}
-
-export async function updateQuestion(id: string, question: Partial<AuditQuestion>) {
-  try {
-    const { data, error } = await supabase
-      .from('audit_questions')
-      .update(question)
-      .eq('id', id)
-      .select()
-      .single()
-
-    if (error) throw error
-    return data
-  } catch (error) {
-    handleSupabaseError(error)
   }
 }
 
