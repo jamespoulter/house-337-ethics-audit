@@ -1,110 +1,123 @@
-'use client'
+"use client"
 
 import { useState } from 'react'
+import { createClientComponentClient } from '@supabase/auth-helpers-nextjs'
+import { useRouter } from 'next/navigation'
+import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
+import { useToast } from "@/components/ui/use-toast"
 import Link from 'next/link'
-import { useAuth } from '@/components/providers/supabase-auth-provider'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card'
-import { Alert, AlertDescription } from '@/components/ui/alert'
-import { AlertCircle } from 'lucide-react'
+import Image from 'next/image'
 
 export default function Login() {
-  const { signIn } = useAuth()
-  const [error, setError] = useState<string | null>(null)
+  const [email, setEmail] = useState('')
+  const [password, setPassword] = useState('')
   const [loading, setLoading] = useState(false)
+  const router = useRouter()
+  const { toast } = useToast()
+  const supabase = createClientComponentClient()
 
-  async function onSubmit(event: React.FormEvent<HTMLFormElement>) {
-    event.preventDefault()
-    setError(null)
+  const handleLogin = async (e: React.FormEvent) => {
+    e.preventDefault()
     setLoading(true)
 
     try {
-      const formData = new FormData(event.currentTarget)
-      const email = formData.get('email') as string
-      const password = formData.get('password') as string
+      const { error } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      })
 
-      if (!email || !password) {
-        throw new Error('Email and password are required')
+      if (error) {
+        toast({
+          title: "Error",
+          description: error.message,
+          variant: "destructive",
+        })
+        return
       }
 
-      await signIn(email, password)
+      router.push('/dashboard')
+      router.refresh()
     } catch (error) {
-      console.error('Login error:', error)
-      setError(error instanceof Error ? error.message : 'Invalid email or password')
+      console.error('Error:', error)
+      toast({
+        title: "Error",
+        description: "An unexpected error occurred",
+        variant: "destructive",
+      })
     } finally {
       setLoading(false)
     }
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center px-4 py-12">
-      <Card className="w-full max-w-md">
-        <CardHeader>
-          <CardTitle>Welcome Back</CardTitle>
-          <CardDescription>
-            Sign in to your account to continue
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <form onSubmit={onSubmit} className="space-y-4">
-            <div className="space-y-2">
-              <label htmlFor="email" className="text-sm font-medium">
-                Email
-              </label>
+    <div className="flex min-h-screen flex-col items-center justify-center py-12 px-4 sm:px-6 lg:px-8 bg-background">
+      <div className="w-full max-w-md space-y-8">
+        <div className="flex flex-col items-center">
+          <Image
+            src="/images/House_Word_logo.png"
+            alt="House 337"
+            width={150}
+            height={45}
+            className="mb-8"
+          />
+          <h2 className="mt-6 text-center text-3xl font-bold tracking-tight">
+            Sign in to your account
+          </h2>
+        </div>
+
+        <form className="mt-8 space-y-6" onSubmit={handleLogin}>
+          <div className="space-y-4 rounded-md shadow-sm">
+            <div>
+              <Label htmlFor="email">Email address</Label>
               <Input
                 id="email"
                 name="email"
                 type="email"
-                placeholder="you@example.com"
-                required
-                disabled={loading}
                 autoComplete="email"
+                required
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                className="mt-1"
               />
             </div>
 
-            <div className="space-y-2">
-              <label htmlFor="password" className="text-sm font-medium">
-                Password
-              </label>
+            <div>
+              <Label htmlFor="password">Password</Label>
               <Input
                 id="password"
                 name="password"
                 type="password"
-                placeholder="••••••••"
-                required
-                disabled={loading}
                 autoComplete="current-password"
+                required
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                className="mt-1"
               />
             </div>
+          </div>
 
-            {error && (
-              <Alert variant="destructive">
-                <AlertCircle className="h-4 w-4" />
-                <AlertDescription>{error}</AlertDescription>
-              </Alert>
-            )}
-
-            <Button type="submit" className="w-full" disabled={loading}>
+          <div>
+            <Button
+              type="submit"
+              className="w-full"
+              disabled={loading}
+            >
               {loading ? 'Signing in...' : 'Sign in'}
             </Button>
-          </form>
-        </CardContent>
-        <CardFooter className="flex flex-col space-y-4">
-          <p className="text-sm text-muted-foreground">
-            Don't have an account?{' '}
-            <Link href="/auth/register" className="text-primary hover:underline">
-              Register
-            </Link>
-          </p>
+          </div>
+        </form>
+
+        <div className="text-center text-sm">
           <Link
-            href="/auth/reset-password"
-            className="text-sm text-muted-foreground hover:underline"
+            href="/auth/register"
+            className="font-medium text-primary hover:text-primary/80"
           >
-            Forgot your password?
+            Don't have an account? Sign up
           </Link>
-        </CardFooter>
-      </Card>
+        </div>
+      </div>
     </div>
   )
 } 

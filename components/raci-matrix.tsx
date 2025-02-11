@@ -1,7 +1,10 @@
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion"
+import { useToast } from "@/components/ui/use-toast"
+import { RACIMatrix as RACIMatrixType } from "@/lib/types"
+import { supabase } from "@/lib/supabase"
 
 const roles = [
   "CEO",
@@ -130,38 +133,123 @@ const responsibilityCategories: ResponsibilityCategory[] = [
   }
 ]
 
-type RACIValue = "R" | "A" | "C" | "I" | "-"
+type RACIValue = 'R' | 'A' | 'C' | 'I' | 'none' | null
 
-export function RACIMatrix() {
-  // Initialize matrix with all responsibilities
-  const allResponsibilities = responsibilityCategories.flatMap(category =>
-    category.subcategories.flatMap(subcategory =>
-      subcategory.responsibilities.map(responsibility => ({
-        category: category.name,
-        subcategory: subcategory.name,
-        responsibility
+interface RACIMatrixProps {
+  auditId: string
+  initialMatrix?: RACIMatrixType[]
+}
+
+export function RACIMatrix({ auditId, initialMatrix = [] }: RACIMatrixProps) {
+  const { toast } = useToast()
+  const [matrix, setMatrix] = useState<Record<string, Record<string, RACIValue>>>({})
+  const [isLoading, setIsLoading] = useState(false)
+
+  // Transform initial matrix data into the required format
+  useEffect(() => {
+    const transformedMatrix: Record<string, Record<string, RACIValue>> = {}
+    initialMatrix.forEach((item) => {
+      if (!transformedMatrix[item.responsibility]) {
+        transformedMatrix[item.responsibility] = {}
+      }
+      transformedMatrix[item.responsibility][item.role] = item.assignment_type
+    })
+    setMatrix(transformedMatrix)
+  }, [initialMatrix])
+
+  const handleChange = async (responsibility: string, role: string, value: RACIValue) => {
+    if (value === 'none') {
+      // Handle clearing the selection
+      setMatrix((prevMatrix) => ({
+        ...prevMatrix,
+        [responsibility]: {
+          ...prevMatrix[responsibility],
+          [role]: null,
+        },
       }))
-    )
-  )
+      return
+    }
 
-  const [matrix, setMatrix] = useState<Record<string, Record<string, RACIValue>>>(
-    allResponsibilities.reduce(
-      (acc, { responsibility }) => ({
-        ...acc,
-        [responsibility]: roles.reduce((roleAcc, role) => ({ ...roleAcc, [role]: "-" }), {}),
-      }),
-      {},
-    )
-  )
+    if (!value) return // Don't save if value is null/empty
 
-  const handleChange = (responsibility: string, role: string, value: RACIValue) => {
-    setMatrix((prevMatrix) => ({
-      ...prevMatrix,
-      [responsibility]: {
-        ...prevMatrix[responsibility],
-        [role]: value,
-      },
-    }))
+    // Find existing entry in initialMatrix
+    const existingEntry = initialMatrix.find(
+      item => item.responsibility === responsibility && item.role === role
+    )
+
+    try {
+      setIsLoading(true)
+      console.log('Updating RACI matrix:', { responsibility, role, value })
+
+      // Update local state immediately for better UX
+      setMatrix((prevMatrix) => ({
+        ...prevMatrix,
+        [responsibility]: {
+          ...prevMatrix[responsibility],
+          [role]: value,
+        },
+      }))
+
+      // Prepare data for Supabase
+      const raciData = {
+        audit_id: auditId,
+        role,
+        responsibility,
+        assignment_type: value
+      }
+
+      let result
+      if (existingEntry) {
+        // Update existing entry
+        console.log('Updating existing entry:', existingEntry.id)
+        const { data, error } = await supabase
+          .from('raci_matrix')
+          .update(raciData)
+          .eq('id', existingEntry.id)
+          .select()
+          .single()
+
+        if (error) throw error
+        result = data
+      } else {
+        // Create new entry
+        console.log('Creating new entry')
+        const { data, error } = await supabase
+          .from('raci_matrix')
+          .insert([raciData])
+          .select()
+          .single()
+
+        if (error) throw error
+        result = data
+      }
+
+      console.log('RACI update successful:', result)
+      toast({
+        title: "Updated",
+        description: `Updated ${role}'s responsibility for ${responsibility}`,
+      })
+
+    } catch (error) {
+      console.error('Error updating RACI matrix:', error)
+      toast({
+        title: "Error",
+        description: "Failed to update RACI matrix. Please try again.",
+        variant: "destructive",
+      })
+      // Revert local state on error
+      if (existingEntry) {
+        setMatrix((prevMatrix) => ({
+          ...prevMatrix,
+          [responsibility]: {
+            ...prevMatrix[responsibility],
+            [role]: existingEntry.assignment_type,
+          },
+        }))
+      }
+    } finally {
+      setIsLoading(false)
+    }
   }
 
   return (
@@ -194,18 +282,19 @@ export function RACIMatrix() {
                           {roles.map((role) => (
                             <TableCell key={role} className="text-center">
                               <Select
-                                value={matrix[responsibility][role]}
+                                value={matrix[responsibility]?.[role] || 'none'}
                                 onValueChange={(value) => handleChange(responsibility, role, value as RACIValue)}
+                                disabled={isLoading}
                               >
                                 <SelectTrigger className="w-[80px] mx-auto">
                                   <SelectValue placeholder="-" />
                                 </SelectTrigger>
                                 <SelectContent>
+                                  <SelectItem value="none">-</SelectItem>
                                   <SelectItem value="R">R</SelectItem>
                                   <SelectItem value="A">A</SelectItem>
                                   <SelectItem value="C">C</SelectItem>
                                   <SelectItem value="I">I</SelectItem>
-                                  <SelectItem value="-">-</SelectItem>
                                 </SelectContent>
                               </Select>
                             </TableCell>
