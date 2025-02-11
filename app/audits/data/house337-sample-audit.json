@@ -1,0 +1,112 @@
+{
+  "id": "house337-2024-02",
+  "name": "House 337 AI Ethics Framework Audit",
+  "organization": "House 337",
+  "status": "Completed",
+  "overallScore": 92,
+  "lastUpdated": "2024-02-11",
+  "framework": {
+    "name": "House 337 AI Ethics Framework",
+    "version": "1.0",
+    "url": "https://www.house337.com/ai-ethics"
+  },
+  "sections": [
+    {
+      "name": "Transparency",
+      "score": 95,
+      "findings": [
+        {
+          "title": "Clear AI Disclosure",
+          "status": "Compliant",
+          "notes": "All AI systems are clearly labeled and disclosed to users",
+          "evidence": "Public AI ethics policy and clear documentation"
+        },
+        {
+          "title": "Process Documentation",
+          "status": "Compliant",
+          "notes": "Detailed documentation of AI development and deployment processes"
+        }
+      ]
+    },
+    {
+      "name": "Fairness & Bias",
+      "score": 90,
+      "findings": [
+        {
+          "title": "Bias Testing",
+          "status": "Compliant",
+          "notes": "Regular testing for algorithmic bias across different demographics",
+          "recommendations": "Consider expanding test cases for edge scenarios"
+        }
+      ]
+    },
+    {
+      "name": "Privacy & Security",
+      "score": 94,
+      "findings": [
+        {
+          "title": "Data Protection",
+          "status": "Compliant",
+          "notes": "Strong data protection measures in place"
+        },
+        {
+          "title": "User Consent",
+          "status": "Compliant",
+          "notes": "Clear consent mechanisms for AI data processing"
+        }
+      ]
+    },
+    {
+      "name": "Accountability",
+      "score": 88,
+      "findings": [
+        {
+          "title": "Governance Structure",
+          "status": "Compliant",
+          "notes": "Clear chain of responsibility for AI decisions"
+        },
+        {
+          "title": "Impact Assessment",
+          "status": "Partially Compliant",
+          "notes": "Regular impact assessments conducted",
+          "recommendations": "Implement more frequent review cycles"
+        }
+      ]
+    },
+    {
+      "name": "Human-Centric Approach",
+      "score": 93,
+      "findings": [
+        {
+          "title": "Human Oversight",
+          "status": "Compliant",
+          "notes": "Maintained human oversight in critical decision processes"
+        },
+        {
+          "title": "User Empowerment",
+          "status": "Compliant",
+          "notes": "Users have control over AI interactions"
+        }
+      ]
+    }
+  ],
+  "recommendations": [
+    {
+      "priority": "High",
+      "description": "Implement more frequent review cycles for impact assessments",
+      "timeline": "Q2 2024"
+    },
+    {
+      "priority": "Medium",
+      "description": "Expand bias testing scenarios",
+      "timeline": "Q3 2024"
+    }
+  ],
+  "certifications": [
+    {
+      "name": "House 337 AI Ethics Compliance",
+      "status": "Certified",
+      "date": "2024-02-11"
+    }
+  ]
+} 

@@ -1,69 +1,68 @@
 "use client"
 
-import { useState } from "react"
-import { useRouter } from "next/navigation"
-import { Button } from "@/components/ui/button"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
+import { Button } from "@/components/ui/button"
 import { Textarea } from "@/components/ui/textarea"
-import { useToast } from "@/components/ui/use-toast"
+import { createNewAudit } from "../actions"
 
 export default function NewAudit() {
-  const [auditData, setAuditData] = useState({
-    name: "",
-    organization: "",
-    description: "",
-  })
-  const router = useRouter()
-  const { toast } = useToast()
-
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    const { name, value } = e.target
-    setAuditData((prev) => ({ ...prev, [name]: value }))
-  }
-
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault()
-    // Here you would typically send the data to your backend
-    console.log("New Audit Data:", auditData)
-    toast({
-      title: "Audit Created",
-      description: "Your new AI ethics audit has been created successfully.",
-    })
-    router.push("/audits")
-  }
-
   return (
-    <div>
-      <h1 className="text-3xl font-bold mb-6">Start New AI Ethics Audit</h1>
+    <div className="max-w-2xl mx-auto py-8">
+      <Card>
+        <CardHeader>
+          <CardTitle>Create New Audit</CardTitle>
+          <CardDescription>
+            Start a new AI ethics audit by providing basic information about the system to be audited.
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <form action={createNewAudit} className="space-y-4">
+            <div className="space-y-2">
+              <label htmlFor="title" className="text-sm font-medium">
+                Audit Title
+              </label>
+              <Input
+                id="title"
+                name="title"
+                placeholder="e.g., Customer Service AI Chatbot Ethics Audit"
+                required
+              />
+            </div>
 
-      <form onSubmit={handleSubmit} className="space-y-4 max-w-md">
-        <div>
-          <Label htmlFor="name">Audit Name</Label>
-          <Input id="name" name="name" value={auditData.name} onChange={handleInputChange} required />
-        </div>
-        <div>
-          <Label htmlFor="organization">Organization</Label>
-          <Input
-            id="organization"
-            name="organization"
-            value={auditData.organization}
-            onChange={handleInputChange}
-            required
-          />
-        </div>
-        <div>
-          <Label htmlFor="description">Description</Label>
-          <Textarea
-            id="description"
-            name="description"
-            value={auditData.description}
-            onChange={handleInputChange}
-            required
-          />
-        </div>
-        <Button type="submit">Create Audit</Button>
-      </form>
+            <div className="space-y-2">
+              <label htmlFor="organization" className="text-sm font-medium">
+                Organization
+              </label>
+              <Input
+                id="organization"
+                name="organization"
+                placeholder="Your organization name"
+                required
+              />
+            </div>
+
+            <div className="space-y-2">
+              <label htmlFor="description" className="text-sm font-medium">
+                Description
+              </label>
+              <Textarea
+                id="description"
+                name="description"
+                placeholder="Brief description of the AI system to be audited"
+                rows={4}
+              />
+            </div>
+
+            <div className="flex justify-end space-x-4">
+              <Button variant="outline" type="button" onClick={() => history.back()}>
+                Cancel
+              </Button>
+              <Button type="submit">Create Audit</Button>
+            </div>
+          </form>
+        </CardContent>
+      </Card>
     </div>
   )
 }
