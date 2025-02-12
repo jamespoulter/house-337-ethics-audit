@@ -95,8 +95,8 @@ export function UserProfileMenu() {
       <Dialog open={isOpen} onOpenChange={setIsOpen}>
         <DialogTrigger asChild>
           <Button 
-            variant="outline" 
-            className="text-white border-white hover:bg-white/10"
+            variant="default"
+            className="bg-[#FF0055] hover:bg-[#FF0055]/90 text-white font-medium"
           >
             Sign In
           </Button>
