@@ -18,6 +18,42 @@ if (!supabaseUrl || !supabaseAnonKey) {
 // Create a Supabase client
 export const supabase = createClient<Database>(supabaseUrl, supabaseAnonKey)
 
+// Update storage bucket name to match Supabase configuration
+const STORAGE_BUCKET = 'images'
+
+export const storage = {
+  // Upload an image to Supabase Storage
+  uploadImage: async (file: File, path: string) => {
+    const { data, error } = await supabase.storage
+      .from(STORAGE_BUCKET)
+      .upload(path, file, {
+        cacheControl: '3600',
+        upsert: true
+      })
+    
+    if (error) throw error
+    return data
+  },
+
+  // Get a public URL for an image
+  getImageUrl: (path: string) => {
+    const { data } = supabase.storage
+      .from(STORAGE_BUCKET)
+      .getPublicUrl(path)
+    
+    return data.publicUrl
+  },
+
+  // Delete an image from storage
+  deleteImage: async (path: string) => {
+    const { error } = await supabase.storage
+      .from(STORAGE_BUCKET)
+      .remove([path])
+    
+    if (error) throw error
+  }
+}
+
 // Error handling helper
 const handleSupabaseError = (error: any) => {
   console.error('Supabase error:', error)

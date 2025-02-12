@@ -7,6 +7,7 @@ import { ThemeProvider } from "@/components/theme-provider"
 import { UserProfileMenu } from "@/components/user-profile-menu"
 import { NavigationMenu } from "@/components/navigation-menu"
 import { type ReactNode } from "react"
+import { assets } from "@/config/assets"
 
 const inter = Inter({ subsets: ["latin"] })
 
@@ -22,6 +23,11 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" suppressHydrationWarning>
+      <head>
+        <link rel="icon" href={assets.favicon} sizes="any" />
+        <link rel="icon" href={assets.icon} type="image/svg+xml" />
+        <link rel="apple-touch-icon" href={assets.appleTouchIcon} />
+      </head>
       <body className={inter.className}>
         <ThemeProvider
           attribute="class"
@@ -34,11 +40,11 @@ export default function RootLayout({
               <nav className="container mx-auto px-4 py-4 flex justify-between items-center">
                 <Link href="/" className="flex items-center space-x-2">
                   <Image 
-                    src="/images/House_Word_logo.png"
-                    alt="House 337"
-                    width={120}
-                    height={36}
-                  />
+                    src={assets.logo.src}
+                    alt={assets.logo.alt}
+                    width={assets.logo.width}
+                    height={assets.logo.height}
+                    />
                 </Link>
                 <div className="flex items-center space-x-6">
                   <NavigationMenu />
@@ -99,13 +105,31 @@ export default function RootLayout({
                     <h4 className="text-lg font-semibold">Follow us</h4>
                     <div className="flex space-x-4">
                       <Link href="https://www.instagram.com/house337/" target="_blank" className="text-gray-400 hover:text-[#FF0055]">
-                        <Image src="/images/instagram.svg" alt="Instagram" width={24} height={24} className="invert" />
+                        <Image 
+                          src={assets.social.instagram.src}
+                          alt={assets.social.instagram.alt}
+                          width={assets.social.instagram.width}
+                          height={assets.social.instagram.height}
+                          className="invert"
+                        />
                       </Link>
                       <Link href="https://uk.linkedin.com/company/house337" target="_blank" className="text-gray-400 hover:text-[#FF0055]">
-                        <Image src="/images/linkedin.svg" alt="LinkedIn" width={24} height={24} className="invert" />
+                        <Image 
+                          src={assets.social.linkedin.src}
+                          alt={assets.social.linkedin.alt}
+                          width={assets.social.linkedin.width}
+                          height={assets.social.linkedin.height}
+                          className="invert"
+                        />
                       </Link>
                       <Link href="https://www.youtube.com/channel/UC1YXLKZ5U6ygNsM-aMjRUWg" target="_blank" className="text-gray-400 hover:text-[#FF0055]">
-                        <Image src="/images/youtube.svg" alt="YouTube" width={24} height={24} className="invert" />
+                        <Image 
+                          src={assets.social.youtube.src}
+                          alt={assets.social.youtube.alt}
+                          width={assets.social.youtube.width}
+                          height={assets.social.youtube.height}
+                          className="invert"
+                        />
                       </Link>
                     </div>
                   </div>
@@ -115,10 +139,12 @@ export default function RootLayout({
                 <div className="border-t border-gray-800 pt-8">
                   <div className="flex flex-col md:flex-row justify-between items-center space-y-4 md:space-y-0">
                     <Image 
-                      src="/images/House_Word_logo.png"
-                      alt="House 337"
-                      width={120}
-                      height={36}                    />
+                      src={assets.logo.src}
+                      alt={assets.logo.alt}
+                      width={assets.logo.width}
+                      height={assets.logo.height}
+                      className="invert"
+                    />
                     <div className="flex flex-col items-center md:items-end space-y-2">
                       <p className="text-sm text-gray-400 text-center md:text-right">
                         House 337 Limited, a company registered in England & Wales with registered number 14105998. 

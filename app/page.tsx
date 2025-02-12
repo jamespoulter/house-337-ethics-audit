@@ -16,6 +16,7 @@ import Image from "next/image"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { ChevronRight, Shield, Scale, Heart, Brain, Users, FileCheck } from "lucide-react"
+import { assets } from "@/config/assets"
 
 export default function Home() {
   return (
@@ -31,11 +32,12 @@ export default function Home() {
           <div className="flex flex-col items-center space-y-8 text-center">
             {/* Company logo */}
             <Image 
-              src="/images/logo.jpg"
-              alt="House 337"
-              width={200}
-              height={60}
-              className="mb-8 brightness-0 invert"
+              src={assets.aiMagicLogo.src}
+              alt={assets.aiMagicLogo.alt}
+              width={assets.aiMagicLogo.width}
+              height={assets.aiMagicLogo.height}
+              className="mb-8"
+              priority
             />
             <div className="space-y-4">
               <h1 className="text-4xl font-bold tracking-tighter sm:text-5xl md:text-6xl lg:text-7xl/none text-white">
@@ -178,10 +180,10 @@ export default function Home() {
             </div>
             <div className="flex justify-center">
               <Image
-                src="/images/ethical-ai-framework.png"
-                alt="AI Ethics Framework"
-                width={800}
-                height={800}
+                src={assets.framework.src}
+                alt={assets.framework.alt}
+                width={assets.framework.width}
+                height={assets.framework.height}
                 className="rounded-lg"
                 priority
               />
@@ -203,11 +205,12 @@ export default function Home() {
               </p>
             </div>
             <Image
-              src="/images/ov_trustmark-white.svg"
-              alt="Linux Foundation Open Trustmark"
-              width={300}
-              height={80}
-              className="mt-4 invert"
+              src={assets.trustmark.src}
+              alt={assets.trustmark.alt}
+              width={assets.trustmark.width}
+              height={assets.trustmark.height}
+              className="mt-4"
+              priority
             />
           </div>
         </div>

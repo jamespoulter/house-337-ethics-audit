@@ -5,6 +5,8 @@ import { Progress } from "@/components/ui/progress"
 import { getServerSupabase } from "@/lib/supabase-server"
 import { CalendarDays, CheckCircle, Clock, FileText } from "lucide-react"
 
+export const dynamic = 'force-dynamic'
+
 export default async function Dashboard() {
   try {
     // Get the current user's session
