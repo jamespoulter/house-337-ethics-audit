@@ -245,21 +245,59 @@ export default function AuditDetail() {
   }
 
   const handleQuestionnaireChange = (category: string, questionId: string, value: number) => {
+    if (!audit) return;
+
+    // Get the current category's questions and update with new value
+    const currentCategory = audit.ethical_assessment[category];
+    const updatedQuestions = {
+      ...currentCategory.questions,
+      [questionId]: value
+    };
+
+    // Calculate new category score
+    const totalPossible = Object.keys(ethicalQuestions[category as keyof typeof ethicalQuestions]).length * 5;
+    const total = Object.values(updatedQuestions).reduce((sum, val) => sum + (val || 0), 0);
+    const newCategoryScore = Math.round((total / totalPossible) * 100);
+
+    // Update the audit state with new response and scores
+    const updatedAssessment = {
+      ...audit.ethical_assessment,
+      [category]: {
+        questions: updatedQuestions,
+        score: newCategoryScore
+      }
+    };
+
+    // Calculate new overall score
+    const scores = Object.values(updatedAssessment).map(cat => cat.score);
+    const validScores = scores.filter(score => score > 0);
+    const newOverallScore = validScores.length > 0 
+      ? Math.round(validScores.reduce((sum, score) => sum + score, 0) / validScores.length)
+      : 0;
+
+    // Update both the ethical assessment responses and the scores
     updateAuditState({
       ethical_assessment_responses: [
-        ...(audit?.ethical_assessment_responses || []).filter(
+        ...(audit.ethical_assessment_responses || []).filter(
           response => response.question_id !== questionId
         ),
         {
-          id: `${audit?.id}-${questionId}`,
+          id: `${audit.id}-${questionId}`,
           category_id: category,
           question_id: questionId,
           response: value,
           created_at: new Date().toISOString(),
           updated_at: new Date().toISOString()
         }
-      ]
-    })
+      ],
+      ethical_assessment: updatedAssessment,
+      overall_score: newOverallScore,
+      ethical_assessment_categories: (audit.ethical_assessment_categories || []).map(cat => 
+        cat.category_name === category 
+          ? { ...cat, score: newCategoryScore }
+          : cat
+      )
+    });
   }
 
   const calculateCategoryScore = (

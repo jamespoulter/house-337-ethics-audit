@@ -130,23 +130,62 @@ export async function createAudit(auditData: Partial<Audit>) {
   }
 }
 
-export async function updateAudit(id: string, audit: Partial<Audit>) {
+export async function updateAudit(id: string, audit: Partial<AuditWithDetails>) {
   try {
-    const { data, error } = await supabase
+    // Start a transaction
+    const { data: auditData, error: auditError } = await supabase
       .from('audits')
       .update({
-        ...audit,
+        name: audit.name,
+        organization: audit.organization,
+        description: audit.description,
+        status: audit.status,
+        overall_score: audit.overall_score,
+        ethical_framework: audit.ethical_framework,
+        risks_and_challenges: audit.risks_and_challenges,
+        mitigation_strategies: audit.mitigation_strategies,
+        continuous_monitoring: audit.continuous_monitoring,
         updated_at: new Date().toISOString()
       })
       .eq('id', id)
       .select()
-      .single()
+      .single();
 
-    if (error) throw error
-    return data
+    if (auditError) throw auditError;
+
+    // Update ethical assessment categories if provided
+    if (audit.ethical_assessment_categories) {
+      const { error: categoriesError } = await supabase
+        .from('ethical_assessment_categories')
+        .upsert(
+          audit.ethical_assessment_categories.map(category => ({
+            ...category,
+            audit_id: id,
+            updated_at: new Date().toISOString()
+          }))
+        );
+
+      if (categoriesError) throw categoriesError;
+    }
+
+    // Update ethical assessment responses if provided
+    if (audit.ethical_assessment_responses) {
+      const { error: responsesError } = await supabase
+        .from('ethical_assessment_responses')
+        .upsert(
+          audit.ethical_assessment_responses.map(response => ({
+            ...response,
+            updated_at: new Date().toISOString()
+          }))
+        );
+
+      if (responsesError) throw responsesError;
+    }
+
+    return auditData;
   } catch (error) {
-    console.error('Error in updateAudit:', error)
-    throw error
+    console.error('Error in updateAudit:', error);
+    throw error;
   }
 }
 
