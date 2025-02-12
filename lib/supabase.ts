@@ -1,7 +1,6 @@
 import { createClient } from '@supabase/supabase-js'
 import { Database } from '@/types/supabase'
 import { 
-  Audit, 
   EthicalAssessmentCategory, 
   EthicalAssessmentResponse,
   StaffInterview,
@@ -268,4 +267,12 @@ export async function batchUpdateResponses(
     handleSupabaseError(error)
     throw error
   }
+}
+
+export type Audit = {
+  id: string
+  name: string
+  organization: string
+  status: string
+  overall_score: number | null
 } 

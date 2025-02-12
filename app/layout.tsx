@@ -6,7 +6,7 @@ import { Toaster } from "@/components/ui/toaster"
 import { ThemeProvider } from "@/components/theme-provider"
 import { UserProfileMenu } from "@/components/user-profile-menu"
 import { NavigationMenu } from "@/components/navigation-menu"
-import type React from "react"
+import { type ReactNode } from "react"
 
 const inter = Inter({ subsets: ["latin"] })
 
@@ -18,7 +18,7 @@ export const metadata = {
 export default function RootLayout({
   children,
 }: {
-  children: React.ReactNode
+  children: ReactNode
 }) {
   return (
     <html lang="en" suppressHydrationWarning>
