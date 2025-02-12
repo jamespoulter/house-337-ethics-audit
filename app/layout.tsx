@@ -5,6 +5,7 @@ import Image from "next/image"
 import { Toaster } from "@/components/ui/toaster"
 import { ThemeProvider } from "@/components/theme-provider"
 import { UserProfileMenu } from "@/components/user-profile-menu"
+import { NavigationMenu } from "@/components/navigation-menu"
 import type React from "react"
 
 const inter = Inter({ subsets: ["latin"] })
@@ -40,18 +41,7 @@ export default function RootLayout({
                   />
                 </Link>
                 <div className="flex items-center space-x-6">
-                  <Link href="/dashboard" className="text-white hover:text-[#FF0055] transition-colors">
-                    Dashboard
-                  </Link>
-                  <Link href="/audits" className="text-white hover:text-[#FF0055] transition-colors">
-                    Audits
-                  </Link>
-                  <Link href="/reports" className="text-white hover:text-[#FF0055] transition-colors">
-                    Reports
-                  </Link>
-                  <Link href="/settings" className="text-white hover:text-[#FF0055] transition-colors">
-                    Settings
-                  </Link>
+                  <NavigationMenu />
                   <UserProfileMenu />
                 </div>
               </nav>

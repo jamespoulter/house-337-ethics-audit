@@ -2,6 +2,9 @@ import { createMiddlewareClient } from '@supabase/auth-helpers-nextjs'
 import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
 
+// Define public routes that don't require authentication
+const publicRoutes = ['/', '/auth/login', '/auth/register', '/auth/callback']
+
 export async function middleware(req: NextRequest) {
   const res = NextResponse.next()
   const supabase = createMiddlewareClient({ req, res })
@@ -10,12 +13,19 @@ export async function middleware(req: NextRequest) {
     data: { session },
   } = await supabase.auth.getSession()
 
-  // If there's no session and the user is trying to access protected routes
-  if (!session && (
-    req.nextUrl.pathname.startsWith('/dashboard') ||
-    req.nextUrl.pathname.startsWith('/audits')
-  )) {
-    return NextResponse.redirect(new URL('/', req.url))
+  const isPublicRoute = publicRoutes.includes(req.nextUrl.pathname)
+  const isAuthRoute = req.nextUrl.pathname.startsWith('/auth/')
+
+  // If user is not logged in and trying to access a protected route
+  if (!session && !isPublicRoute) {
+    const redirectUrl = new URL('/auth/login', req.url)
+    redirectUrl.searchParams.set('redirectTo', req.nextUrl.pathname)
+    return NextResponse.redirect(redirectUrl)
+  }
+
+  // If user is logged in and trying to access auth routes
+  if (session && isAuthRoute) {
+    return NextResponse.redirect(new URL('/dashboard', req.url))
   }
 
   return res
@@ -29,7 +39,8 @@ export const config = {
      * - _next/image (image optimization files)
      * - favicon.ico (favicon file)
      * - public folder
+     * - api routes
      */
-    '/((?!_next/static|_next/image|favicon.ico|public/).*)',
+    '/((?!_next/static|_next/image|favicon.ico|public/|api/).*)',
   ],
 } 

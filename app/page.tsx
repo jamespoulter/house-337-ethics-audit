@@ -1,3 +1,16 @@
+/**
+ * Home Page Component
+ * 
+ * This is the main landing page for the AI Ethics Audit Platform. It consists of several sections:
+ * - Hero section with main CTA
+ * - Features overview
+ * - Audit process explanation
+ * - Framework visualization
+ * - Trust indicators
+ * - Final CTA
+ * - Footer
+ */
+
 import Link from "next/link"
 import Image from "next/image"
 import { Button } from "@/components/ui/button"
@@ -7,14 +20,16 @@ import { ChevronRight, Shield, Scale, Heart, Brain, Users, FileCheck } from "luc
 export default function Home() {
   return (
     <div className="flex flex-col min-h-screen bg-white">
-      {/* Hero Section */}
+      {/* Hero Section - Main landing area with platform introduction */}
       <section className="relative py-20 lg:py-32 overflow-hidden bg-black">
         <div className="absolute inset-0 grid grid-cols-2 -space-x-52 opacity-10">
+          {/* Decorative background gradients */}
           <div className="blur-[106px] h-56 bg-gradient-to-br from-[#FF0055] to-[#FF0055]/60" />
           <div className="blur-[106px] h-32 bg-gradient-to-r from-[#FF0055]/30 to-[#FF0055]/5" />
         </div>
         <div className="max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex flex-col items-center space-y-8 text-center">
+            {/* Company logo */}
             <Image 
               src="/images/logo.jpg"
               alt="House 337"
@@ -30,24 +45,11 @@ export default function Home() {
                 Comprehensive AI ethics evaluation based on the Linux Foundation's Open Trustmark initiative. Combining stakeholder interviews, quantitative scoring, and detailed governance frameworks to ensure responsible AI development.
               </p>
             </div>
-            <div className="flex flex-col sm:flex-row gap-4">
-              <Link href="/audits/new">
-                <Button size="lg" className="bg-[#FF0055] hover:bg-[#FF0055]/90 text-white shadow-lg">
-                  Start Your Audit
-                  <ChevronRight className="ml-2 h-4 w-4" />
-                </Button>
-              </Link>
-              <Link href="/about">
-                <Button variant="outline" size="lg" className="border-[#FF0055] text-[#FF0055] hover:bg-[#FF0055]/10 bg-black">
-                  Learn More
-                </Button>
-              </Link>
-            </div>
           </div>
         </div>
       </section>
 
-      {/* Features Section */}
+      {/* Features Section - Overview of key platform capabilities */}
       <section className="py-16 lg:py-24 bg-gray-50 border-t border-gray-100">
         <div className="max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid gap-12 lg:gap-24">
@@ -59,6 +61,7 @@ export default function Home() {
                 Our audit framework combines structured stakeholder interviews, quantitative assessment metrics, and industry-standard governance models to provide a thorough evaluation of your AI system's ethical implementation.
               </p>
             </div>
+            {/* Feature cards highlighting key aspects */}
             <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
               <Card className="relative overflow-hidden border-none shadow-md hover:shadow-xl transition-shadow bg-white">
                 <CardContent className="p-6 flex flex-col items-center text-center space-y-4">
@@ -98,7 +101,7 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Process Section */}
+      {/* Process Section - Step-by-step explanation of the audit process */}
       <section className="py-16 lg:py-24 bg-white border-t border-gray-100">
         <div className="max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid gap-12 lg:gap-24">
@@ -111,7 +114,9 @@ export default function Home() {
               </p>
             </div>
             <div className="relative">
+              {/* Decorative connecting line between process steps */}
               <div className="absolute top-1/2 left-0 w-full h-1 bg-gradient-to-r from-[#FF0055]/20 via-[#FF0055]/40 to-[#FF0055]/20 hidden lg:block -translate-y-1/2" />
+              {/* Process steps grid */}
               <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-4 relative">
                 {[
                   {
@@ -159,7 +164,7 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Framework Visualization */}
+      {/* Framework Visualization Section - Visual representation of the ethical framework */}
       <section className="py-16 lg:py-24 bg-black border-t border-gray-800">
         <div className="max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid gap-12 lg:gap-24">
@@ -185,7 +190,7 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Trust Indicators */}
+      {/* Trust Indicators Section - Displays industry certifications and standards */}
       <section className="py-16 bg-gray-50 border-t border-gray-100">
         <div className="max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex flex-col items-center space-y-8">
@@ -208,7 +213,7 @@ export default function Home() {
         </div>
       </section>
 
-      {/* CTA Section */}
+      {/* CTA Section - Final call-to-action */}
       <section className="py-16 lg:py-24 bg-white">
         <div className="max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex flex-col items-center space-y-8 text-center">
@@ -220,7 +225,7 @@ export default function Home() {
                 Join organizations committed to ethical AI development through our comprehensive interview-based assessment and quantitative scoring framework.
               </p>
             </div>
-            <Link href="/contact">
+            <Link href="https://www.house337.com/our-expertise#ai">
               <Button size="lg" className="bg-[#FF0055] hover:bg-[#FF0055]/90 text-white shadow-lg">
                 Schedule a Consultation
                 <ChevronRight className="ml-2 h-4 w-4" />
@@ -229,22 +234,6 @@ export default function Home() {
           </div>
         </div>
       </section>
-
-      {/* Footer */}
-      <footer className="py-12 bg-white border-t border-gray-100">
-        <div className="max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-center">
-            <Image 
-              src="/images/House_Word_logo.png"
-              alt="House 337"
-              width={150}
-              height={45}
-              className="opacity-80"
-            />
-          </div>
-        </div>
-      </footer>
     </div>
   )
 }
-
