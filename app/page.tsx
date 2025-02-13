@@ -165,53 +165,88 @@ export default function Home() {
           </div>
         </div>
       </section>
-
-      {/* Framework Visualization Section - Visual representation of the ethical framework */}
-      <section className="py-16 lg:py-24 bg-black border-t border-gray-800">
-        <div className="max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid gap-12 lg:gap-24">
-            <div className="text-center space-y-4">
-              <h2 className="text-3xl font-bold tracking-tighter sm:text-4xl md:text-5xl text-white">
-                Our Ethical Framework
-              </h2>
-              <p className="mx-auto max-w-[700px] text-gray-300 md:text-lg">
-                Based on industry-leading standards and comprehensive evaluation criteria
-              </p>
+      {/* Framework and Trust Indicators Section */}
+      <section className="relative py-24 lg:py-32 bg-black border-t border-gray-800 overflow-hidden">
+        {/* Background gradient effect */}
+        <div className="absolute inset-0 bg-gradient-to-br from-[#FF0055]/10 via-transparent to-transparent opacity-50" />
+        
+        <div className="max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8 relative">
+          <div className="text-center space-y-6 mb-16">
+            <div className="inline-block">
+              <span className="inline-block px-4 py-1 rounded-full text-sm font-medium bg-[#FF0055]/10 text-[#FF0055] mb-4">
+                Our Approach
+              </span>
             </div>
-            <div className="flex justify-center">
-              <Image
-                src={assets.framework.src}
-                alt={assets.framework.alt}
-                width={assets.framework.width}
-                height={assets.framework.height}
-                className="rounded-lg"
-                priority
-              />
-            </div>
+            <h2 className="text-4xl font-bold tracking-tighter sm:text-5xl md:text-6xl text-white">
+              Our Ethical Framework
+            </h2>
+            <p className="mx-auto max-w-[700px] text-gray-300 md:text-xl font-light">
+              Based on industry-leading standards and comprehensive evaluation criteria
+            </p>
           </div>
-        </div>
-      </section>
-
-      {/* Trust Indicators Section - Displays industry certifications and standards */}
-      <section className="py-16 bg-gray-50 border-t border-gray-100">
-        <div className="max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex flex-col items-center space-y-8">
-            <div className="text-center space-y-4">
-              <h2 className="text-2xl font-bold tracking-tighter text-black">
-                Powered by Industry Standards
-              </h2>
-              <p className="text-gray-600">
-                Our audit framework is aligned with the Linux Foundation's Open Trustmark Initiative
-              </p>
+          
+          <div className="grid lg:grid-cols-2 gap-16 items-center">
+            {/* Trust Indicators */}
+            <div className="flex flex-col items-center lg:items-start space-y-10">
+              <div className="text-center lg:text-left space-y-6 max-w-xl">
+                <h3 className="text-3xl font-bold tracking-tighter text-white">
+                  Powered by Industry Standards
+                </h3>
+                <p className="text-gray-300 text-lg leading-relaxed">
+                  Our audit framework is aligned with the Linux Foundation's Open Trustmark Initiative, ensuring the highest standards of AI ethics evaluation.
+                </p>
+                <Link 
+                  href="https://trustmarkinitiative.ai/trustworthy-ai-framework/guiding-principles/"
+                  target="_blank"
+                  rel="noopener noreferrer" 
+                  className="inline-flex items-center space-x-2 text-[#FF0055] hover:text-[#FF0055]/80 transition-colors group"
+                >
+                  <span className="underline underline-offset-4">Learn more about the Trustmark Initiative</span>
+                  <ChevronRight className="h-4 w-4 transform group-hover:translate-x-1 transition-transform" />
+                </Link>
+              </div>
+              
+              {/* Trustmark logo with hover effect */}
+              <div className="group relative cursor-pointer">
+                <Link 
+                  href="https://trustmarkinitiative.ai/trustworthy-ai-framework/guiding-principles/"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  <div className="absolute -inset-1 bg-gradient-to-r from-[#FF0055] to-[#FF0055]/60 rounded-lg blur opacity-25 group-hover:opacity-75 transition duration-200" />
+                  <div className="relative bg-black p-6 rounded-lg ring-1 ring-gray-800/50">
+                    <Image
+                      src={assets.trustmark.src}
+                      alt={assets.trustmark.alt}
+                      width={assets.trustmark.width}
+                      height={assets.trustmark.height}
+                      className="w-[300px] transition-transform duration-200 group-hover:scale-105"
+                      priority
+                    />
+                  </div>
+                </Link>
+              </div>
             </div>
-            <Image
-              src={assets.trustmark.src}
-              alt={assets.trustmark.alt}
-              width={assets.trustmark.width}
-              height={assets.trustmark.height}
-              className="mt-4"
-              priority
-            />
+
+            {/* Framework Visualization */}
+            <div className="relative group">
+              {/* Decorative elements */}
+              <div className="absolute -inset-4 rounded-xl bg-gradient-to-r from-[#FF0055]/20 to-transparent opacity-0 group-hover:opacity-100 blur-xl transition-opacity duration-500" />
+              
+              <div className="relative p-1">
+                <div className="absolute inset-0 bg-gradient-to-r from-[#FF0055]/20 to-[#FF0055]/5 rounded-xl opacity-50" />
+                <div className="relative bg-black/50 backdrop-blur-sm p-8 rounded-xl ring-1 ring-white/10">
+                  <Image
+                    src={assets.framework.src}
+                    alt={assets.framework.alt}
+                    width={600}
+                    height={450}
+                    className="rounded-lg transition-all duration-300 group-hover:scale-[1.02] group-hover:shadow-2xl"
+                    priority
+                  />
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </section>
