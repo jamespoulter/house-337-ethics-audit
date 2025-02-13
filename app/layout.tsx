@@ -12,8 +12,93 @@ import { assets } from "@/config/assets"
 const inter = Inter({ subsets: ["latin"] })
 
 export const metadata = {
-  title: "House 337 AI Ethics Audit",
-  description: "Conduct comprehensive AI Ethics Audits aligned with industry standards and responsible AI principles",
+  title: "AI Ethics Audit Platform | House 337 | Responsible AI Development",
+  description: "Comprehensive AI ethics evaluation platform based on Linux Foundation's Open Trustmark initiative. Expert assessment of AI systems for transparency, accountability, and ethical compliance.",
+  keywords: [
+    "AI ethics",
+    "artificial intelligence ethics",
+    "AI governance",
+    "ethical AI",
+    "responsible AI",
+    "AI compliance",
+    "AI transparency",
+    "AI accountability",
+    "AI risk assessment",
+    "AI audit",
+    "AI ethics framework",
+    "ethical technology",
+    "AI ethics certification",
+    "AI ethics consulting",
+    "AI ethics assessment",
+    "trustworthy AI",
+    "AI ethics guidelines",
+    "AI ethics standards",
+    "AI ethics best practices",
+    "AI ethics compliance"
+  ],
+  authors: [{ name: "House 337" }],
+  creator: "House 337",
+  publisher: "House 337",
+  openGraph: {
+    type: "website",
+    locale: "en_GB",
+    url: "https://aiethics.house337.com",
+    site_name: "House 337 AI Ethics Audit Platform",
+    title: "AI Ethics Audit Platform | Expert AI Ethics Assessment & Certification",
+    description: "Industry-leading AI ethics evaluation platform. Ensure your AI systems meet ethical standards, build trust, and demonstrate responsible innovation.",
+    images: [
+      {
+        url: `${assets.logo.src}`,
+        width: 1200,
+        height: 630,
+        alt: "House 337 AI Ethics Audit Platform"
+      }
+    ]
+  },
+  twitter: {
+    card: "summary_large_image",
+    site: "@house337",
+    creator: "@house337",
+    title: "AI Ethics Audit Platform | Expert AI Ethics Assessment",
+    description: "Comprehensive AI ethics evaluation platform. Build trust through ethical AI development and certification.",
+    images: [`${assets.logo.src}`]
+  },
+  alternates: {
+    canonical: "https://aiethics.house337.com"
+  },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      'max-video-preview': -1,
+      'max-image-preview': 'large',
+      'max-snippet': -1,
+    },
+  },
+  verification: {
+    google: "verification_token",
+  }
+}
+
+// Add JSON-LD structured data
+const jsonLd = {
+  "@context": "https://schema.org",
+  "@type": "Service",
+  "name": "House 337 AI Ethics Audit Platform",
+  "description": "Comprehensive AI ethics evaluation and certification platform based on industry standards",
+  "provider": {
+    "@type": "Organization",
+    "name": "House 337",
+    "url": "https://www.house337.com"
+  },
+  "areaServed": "Worldwide",
+  "serviceType": "AI Ethics Audit",
+  "offers": {
+    "@type": "Offer",
+    "description": "AI Ethics Assessment and Certification"
+  }
 }
 
 export default function RootLayout({
@@ -27,6 +112,14 @@ export default function RootLayout({
         <link rel="icon" href={assets.favicon} sizes="any" />
         <link rel="icon" href={assets.icon} type="image/svg+xml" />
         <link rel="apple-touch-icon" href={assets.appleTouchIcon} />
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+        />
+        <meta name="theme-color" content="#FF0055" />
+        <meta name="format-detection" content="telephone=no" />
+        <meta name="apple-mobile-web-app-capable" content="yes" />
+        <meta name="apple-mobile-web-app-status-bar-style" content="black" />
       </head>
       <body className={inter.className}>
         <ThemeProvider
