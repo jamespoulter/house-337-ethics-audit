@@ -2,7 +2,8 @@
 
 import { useEffect, useState } from 'react'
 import { User } from '@supabase/supabase-js'
-import { supabase } from '@/lib/supabase'
+import { createClientComponentClient } from '@supabase/auth-helpers-nextjs'
+import { useRouter } from 'next/navigation'
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -34,6 +35,8 @@ export function UserProfileMenu() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [isSignUp, setIsSignUp] = useState(false)
+  const supabase = createClientComponentClient()
+  const router = useRouter()
 
   useEffect(() => {
     // Get initial session
@@ -53,7 +56,34 @@ export function UserProfileMenu() {
   }, [])
 
   const handleSignOut = async () => {
-    await supabase.auth.signOut()
+    try {
+      // Clear cookies and local storage first
+      await supabase.auth.signOut({ scope: 'local' })
+      
+      // Clear local state
+      setUser(null)
+      
+      // Show success message
+      toast({
+        title: "Signed out successfully",
+        description: "You have been signed out of your account.",
+      })
+
+      // Only reload if we're not already on the home page
+      if (window.location.pathname !== '/') {
+        window.location.href = '/'
+      } else {
+        // If we're already on home, just refresh the page
+        window.location.reload()
+      }
+    } catch (error) {
+      console.error('Error signing out:', error)
+      toast({
+        title: "Error signing out",
+        description: "There was a problem signing out. Please try again.",
+        variant: "destructive",
+      })
+    }
   }
 
   const handleSubmit = async (e: React.FormEvent) => {
