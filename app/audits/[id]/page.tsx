@@ -158,14 +158,15 @@ interface AuditState extends AuditWithDetails {
 }
 
 export default function AuditDetail() {
-  const { id } = useParams()
+  const params = useParams<{ id: string }>()
+  const id = params?.id
+  const router = useRouter()
   const { toast } = useToast()
   const [audit, setAudit] = useState<AuditState | null>(null)
   const [loading, setLoading] = useState(true)
   const [activeTab, setActiveTab] = useState("general")
   const [isSaving, setIsSaving] = useState(false)
   const [lastSaved, setLastSaved] = useState<Date | null>(null)
-  const router = useRouter()
   const [isReportModalOpen, setIsReportModalOpen] = useState(false)
   const [reportData, setReportData] = useState<{
     title: string;
@@ -180,6 +181,20 @@ export default function AuditDetail() {
   const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false)
   const [reportToDelete, setReportToDelete] = useState<string | null>(null)
   const [isDeleting, setIsDeleting] = useState(false)
+
+  // Check authentication on mount
+  useEffect(() => {
+    const checkAuth = async () => {
+      const { data: { session } } = await supabase.auth.getSession()
+      if (!session) {
+        const redirectUrl = new URL('/auth/login', window.location.origin)
+        redirectUrl.searchParams.set('redirectTo', window.location.pathname)
+        router.push(redirectUrl.toString())
+        return
+      }
+    }
+    checkAuth()
+  }, [])
 
   // Add the useUnsavedChanges hook
   const { hasUnsavedChanges, setCurrentData } = useUnsavedChanges(audit)
@@ -256,46 +271,89 @@ export default function AuditDetail() {
     }
   })
 
+  // Fetch audit data
   useEffect(() => {
     const fetchAudit = async () => {
+      if (!id) {
+        toast({
+          title: "Error",
+          description: "No audit ID provided",
+          variant: "destructive",
+        })
+        router.push('/audits')
+        return
+      }
+
       try {
-        if (!id) return
-        const data = await getAuditById(id as string)
-        if (data) {
-          // Transform the data into the format expected by the UI
-          const ethicalAssessment: AuditState['ethical_assessment'] = {}
-          
-          // Group responses by category
-          const responsesByCategory = data.ethical_assessment_categories?.reduce((acc, category) => {
-            const responses = data.ethical_assessment_responses?.filter(
-              response => response.category_name === category.category_name
-            ) || []
-            
-            acc[category.category_name] = {
-              questions: responses.reduce((questions, response) => ({
-                ...questions,
-                [response.question_id]: response.response || 0
-              }), {}),
-              score: category.score || 0
-            }
-            return acc
-          }, {} as AuditState['ethical_assessment']) || {}
-
-          // Initialize empty categories if they don't exist
-          Object.keys(ethicalQuestions).forEach(category => {
-            if (!responsesByCategory[category]) {
-              responsesByCategory[category] = {
-                questions: {},
-                score: 0
-              }
-            }
-          })
-
-          setAudit({
-            ...data,
-            ethical_assessment: responsesByCategory
-          })
+        const { data: { session } } = await supabase.auth.getSession()
+        if (!session) {
+          return // Auth effect will handle redirect
         }
+
+        // Fetch audit directly with Supabase client
+        const { data: audit, error } = await supabase
+          .from('audits')
+          .select(`
+            *,
+            ethical_assessment_categories (*),
+            ethical_assessment_responses (
+              *,
+              ethical_assessment_questions (*)
+            ),
+            raci_matrix (*),
+            staff_interviews (*)
+          `)
+          .eq('id', id)
+          .eq('user_id', session.user.id)
+          .single()
+
+        if (error) {
+          console.error('Error fetching audit:', error)
+          throw error
+        }
+
+        if (!audit) {
+          toast({
+            title: "Error",
+            description: "Audit not found or you don't have permission to view it",
+            variant: "destructive",
+          })
+          router.push('/audits')
+          return
+        }
+
+        // Transform the data into the format expected by the UI
+        const ethicalAssessment: AuditState['ethical_assessment'] = {}
+        
+        // Group responses by category
+        audit.ethical_assessment_categories?.forEach(category => {
+          const responses = audit.ethical_assessment_responses?.filter(
+            response => response.category_name === category.category_name
+          ) || []
+          
+          ethicalAssessment[category.category_name] = {
+            questions: responses.reduce((questions, response) => ({
+              ...questions,
+              [response.question_id]: response.response || 0
+            }), {}),
+            score: category.score || 0
+          }
+        })
+
+        // Initialize empty categories if they don't exist
+        Object.keys(ethicalQuestions).forEach(category => {
+          if (!ethicalAssessment[category]) {
+            ethicalAssessment[category] = {
+              questions: {},
+              score: 0
+            }
+          }
+        })
+
+        setAudit({
+          ...audit,
+          ethical_assessment: ethicalAssessment
+        } as AuditState)
       } catch (error) {
         console.error('Error fetching audit:', error)
         toast({
@@ -303,13 +361,14 @@ export default function AuditDetail() {
           description: "Failed to load audit details",
           variant: "destructive",
         })
+        router.push('/audits')
       } finally {
         setLoading(false)
       }
     }
 
     fetchAudit()
-  }, [id, toast])
+  }, [id, router, toast, supabase])
 
   // Add a new useEffect to fetch reports
   useEffect(() => {

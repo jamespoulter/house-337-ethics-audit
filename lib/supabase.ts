@@ -66,36 +66,18 @@ const handleSupabaseError = (error: any) => {
 // Audit functions
 export async function getAudits() {
   try {
-    // Check authentication first
-    const { data: { session }, error: authError } = await supabase.auth.getSession()
+    console.log('Fetching audits from Supabase...')
     
-    if (authError) {
-      console.error('Authentication error:', authError)
-      throw new Error('Authentication failed')
-    }
-
-    if (!session) {
-      console.error('No active session')
-      throw new Error('Not authenticated')
-    }
-
-    console.log('Authenticated as user:', session.user.id)
-    
-    // Fetch audits with detailed logging
     const { data, error, status, statusText, count } = await supabase
       .from('audits')
       .select('*', { count: 'exact' })
-      .eq('user_id', session.user.id) // Explicitly filter by user_id
       .order('created_at', { ascending: false })
 
     if (error) {
       console.error('Supabase error fetching audits:', {
         error,
         status,
-        statusText,
-        errorCode: error.code,
-        errorMessage: error.message,
-        errorDetails: error.details
+        statusText
       })
       throw error
     }
@@ -105,8 +87,7 @@ export async function getAudits() {
       statusText,
       totalCount: count,
       rowCount: data?.length || 0,
-      data,
-      userId: session.user.id
+      data
     })
 
     return data as Audit[]
@@ -121,46 +102,6 @@ export async function getAudits() {
 
 export async function getAuditById(id: string): Promise<AuditWithDetails | null> {
   try {
-    // Check authentication first
-    const { data: { session }, error: authError } = await supabase.auth.getSession()
-    
-    if (authError) {
-      console.error('Authentication error:', authError)
-      throw new Error('Authentication failed')
-    }
-
-    if (!session) {
-      console.error('No active session')
-      throw new Error('Not authenticated')
-    }
-
-    console.log('Fetching audit with ID:', id, 'for user:', session.user.id)
-    
-    // First, check if the audit exists and is accessible
-    const { data: auditExists, error: existsError } = await supabase
-      .from('audits')
-      .select('id')
-      .eq('id', id)
-      .eq('user_id', session.user.id) // Explicitly check user ownership
-      .single()
-
-    if (existsError) {
-      console.error('Error checking audit existence:', {
-        error: existsError,
-        errorCode: existsError.code,
-        errorMessage: existsError.message,
-        errorDetails: existsError.details,
-        userId: session.user.id,
-        auditId: id
-      })
-      throw existsError
-    }
-
-    if (!auditExists) {
-      console.error('No audit found with id:', id, 'for user:', session.user.id)
-      return null
-    }
-
     // Get main audit data with all related information in a single query
     const { data: audit, error: auditError } = await supabase
       .from('audits')
@@ -175,68 +116,30 @@ export async function getAuditById(id: string): Promise<AuditWithDetails | null>
         staff_interviews (*)
       `)
       .eq('id', id)
-      .eq('user_id', session.user.id) // Explicitly check user ownership
-      .single()
+      .maybeSingle()
 
     if (auditError) {
-      console.error('Error fetching audit details:', {
-        error: auditError,
-        errorCode: auditError.code,
-        errorMessage: auditError.message,
-        errorDetails: auditError.details,
-        hint: auditError.hint,
-        userId: session.user.id,
-        auditId: id
-      })
+      console.error('Error fetching audit:', auditError)
       throw auditError
     }
 
     if (!audit) {
-      console.error('No audit details found with id:', id, 'for user:', session.user.id)
+      console.error('No audit found with id:', id)
       return null
     }
-
-    console.log('Successfully fetched audit:', {
-      id: audit.id,
-      name: audit.name,
-      userId: session.user.id,
-      categoriesCount: audit.ethical_assessment_categories?.length || 0,
-      responsesCount: audit.ethical_assessment_responses?.length || 0,
-      raciCount: audit.raci_matrix?.length || 0,
-      interviewsCount: audit.staff_interviews?.length || 0
-    })
 
     return audit as AuditWithDetails
   } catch (error) {
     console.error('Error in getAuditById:', error)
-    return null
+    throw error
   }
 }
 
 export async function createAudit(auditData: Partial<Audit>) {
   try {
-    // Get the current session
-    const { data: { session }, error: authError } = await supabase.auth.getSession()
-    
-    if (authError) {
-      console.error('Authentication error:', authError)
-      throw new Error('Authentication failed')
-    }
-
-    if (!session) {
-      console.error('No active session')
-      throw new Error('Not authenticated')
-    }
-
-    // Add user_id to the audit data
-    const auditWithUserId = {
-      ...auditData,
-      user_id: session.user.id
-    }
-
     const { data, error } = await supabase
       .from('audits')
-      .insert([auditWithUserId])
+      .insert([auditData])
       .select()
       .single()
 

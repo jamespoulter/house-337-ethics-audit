@@ -12,7 +12,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table"
-import { getAudits, type Audit } from '@/lib/supabase'
+import { type Audit } from '@/lib/supabase'
 import { useToast } from "@/components/ui/use-toast"
 import { createClientComponentClient } from '@supabase/auth-helpers-nextjs'
 import { useRouter } from 'next/navigation'
@@ -39,8 +39,13 @@ export default function Audits() {
   useEffect(() => {
     const fetchAudits = async () => {
       try {
-        const data = await getAudits()
-        setAudits(data)
+        const { data, error } = await supabase
+          .from('audits')
+          .select('*')
+          .order('created_at', { ascending: false })
+
+        if (error) throw error
+        setAudits(data || [])
       } catch (error) {
         console.error('Error fetching audits:', error)
         toast({
@@ -54,7 +59,7 @@ export default function Audits() {
     }
 
     fetchAudits()
-  }, [toast])
+  }, [supabase, toast])
 
   const getScoreColor = (score: number | null) => {
     if (!score) return 'bg-gray-500'
