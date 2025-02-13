@@ -29,6 +29,7 @@ import { format } from "date-fns"
 interface StaffInterviewLogProps {
   auditId: string
   initialInterviews?: StaffInterview[]
+  onReportProgress?: (data: string) => void
 }
 
 interface EditDialogProps {
@@ -157,7 +158,11 @@ function EditInterviewDialog({ interview, onSave, onDelete, isLoading }: EditDia
   )
 }
 
-export function StaffInterviewLog({ auditId, initialInterviews = [] }: StaffInterviewLogProps) {
+export function StaffInterviewLog({ 
+  auditId, 
+  initialInterviews = [], 
+  onReportProgress = () => {}
+}: StaffInterviewLogProps) {
   const [staffMembers, setStaffMembers] = useState<StaffInterview[]>(initialInterviews)
   const [newStaff, setNewStaff] = useState({ staff_name: "", position: "" })
   const [isLoading, setIsLoading] = useState(false)
@@ -299,6 +304,61 @@ export function StaffInterviewLog({ auditId, initialInterviews = [] }: StaffInte
   const handleKeyPress = (e: React.KeyboardEvent) => {
     if (e.key === "Enter") {
       handleAddStaff()
+    }
+  }
+
+  const handleCreateReport = async (data: {
+    title: string
+    description: string
+    customInstructions: string
+  }) => {
+    try {
+      const response = await fetch('/api/reports', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          auditId: auditId,
+          ...data
+        }),
+      })
+
+      if (!response.ok) {
+        throw new Error('Failed to start report generation')
+      }
+
+      const reader = response.body?.getReader()
+      const decoder = new TextDecoder()
+
+      if (!reader) {
+        throw new Error('Failed to initialize stream reader')
+      }
+
+      while (true) {
+        const { done, value } = await reader.read()
+        if (done) break
+
+        const chunk = decoder.decode(value)
+        const lines = chunk.split('\n')
+
+        for (const line of lines) {
+          if (line.startsWith('data: ')) {
+            const data = line.slice(6)
+            if (data === '[DONE]') {
+              return
+            }
+            onReportProgress(data)
+          }
+        }
+      }
+    } catch (error) {
+      console.error('Error in report generation:', error)
+      toast({
+        title: 'Error',
+        description: 'Failed to generate report',
+        variant: 'destructive',
+      })
     }
   }
 

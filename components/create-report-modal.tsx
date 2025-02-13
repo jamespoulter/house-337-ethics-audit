@@ -17,6 +17,7 @@ import { useToast } from "@/components/ui/use-toast"
 import { Loader2, FileText, CheckCircle2 } from "lucide-react"
 import { Progress } from "@/components/ui/progress"
 import { useRouter } from "next/navigation"
+import { ToastAction } from "@/components/ui/toast"
 
 interface CreateReportModalProps {
   auditId: string
@@ -27,14 +28,63 @@ interface CreateReportModalProps {
     description: string
     customInstructions: string
   }) => Promise<void>
+  onProgress?: (data: string) => void
   isGenerating?: boolean
-  generatedContent?: string
+  onReportGenerated?: (reportId: string) => void
 }
 
-interface ProgressPhase {
+const progressPhases = {
+  INITIALIZING: {
+    message: "Preparing report generation...",
+    progress: 5
+  },
+  FETCHING_DATA: {
+    message: "Gathering audit data...",
+    progress: 15
+  },
+  ANALYZING: {
+    message: "Analyzing ethical assessment results...",
+    progress: 30
+  },
+  GENERATING: {
+    message: "Creating comprehensive report...",
+    progress: 60
+  },
+  SAVING: {
+    message: "Finalizing and saving report...",
+    progress: 90
+  },
+  COMPLETE: {
+    message: "Report generated successfully!",
+    progress: 100
+  }
+} as const
+
+type ProgressPhase = keyof typeof progressPhases
+
+interface ProgressDisplayProps {
   phase: string
-  message: string
   progress: number
+  message: string
+}
+
+function ProgressDisplay({ phase, progress, message }: ProgressDisplayProps) {
+  return (
+    <div className="space-y-4">
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-2">
+          {progress < 100 ? (
+            <Loader2 className="h-4 w-4 animate-spin" />
+          ) : (
+            <CheckCircle2 className="h-4 w-4 text-green-500" />
+          )}
+          <p className="text-sm font-medium">{message}</p>
+        </div>
+        <span className="text-sm text-muted-foreground">{Math.round(progress)}%</span>
+      </div>
+      <Progress value={progress} className="h-2" />
+    </div>
+  )
 }
 
 export function CreateReportModal({
@@ -42,8 +92,9 @@ export function CreateReportModal({
   open,
   onOpenChange,
   onSubmit,
+  onProgress,
   isGenerating = false,
-  generatedContent = "",
+  onReportGenerated,
 }: CreateReportModalProps) {
   const router = useRouter()
   const { toast } = useToast()
@@ -71,75 +122,71 @@ export function CreateReportModal({
     }
   }, [open])
 
-  useEffect(() => {
-    if (!generatedContent) return
-
-    try {
-      if (generatedContent.startsWith('data: ')) {
-        const data = generatedContent.slice(6).trim()
-        
-        if (data === "[DONE]") {
-          return
-        }
-
-        try {
-          const parsedData = JSON.parse(data)
-          
-          if (parsedData.status === "complete") {
-            setProgress(100)
-            setGenerationPhase("Report generation complete!")
-            setReportId(parsedData.reportId)
-            setIsLoading(false)
-            
-            toast({
-              title: "Success!",
-              description: "Your report has been generated successfully.",
-              variant: "success",
-            })
-            return
-          }
-
-          if (parsedData.error) {
-            toast({
-              title: "Error",
-              description: parsedData.error,
-              variant: "destructive",
-            })
-            setIsLoading(false)
-            return
-          }
-
-          if (parsedData.phase) {
-            setGenerationPhase(parsedData.message || "Processing...")
-            setProgress(parsedData.progress || 0)
-          }
-
-          if (parsedData.text) {
-            return
-          }
-        } catch (e) {
-          console.error('Failed to parse SSE data:', data, e)
-        }
-      }
-    } catch (error) {
-      console.error('Error processing generated content:', error)
-      toast({
-        title: "Error",
-        description: "Failed to process report content. Please try again.",
-        variant: "destructive",
-      })
-      setIsLoading(false)
-    }
-  }, [generatedContent, toast])
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setIsLoading(true)
-    setProgress(0)
-    setGenerationPhase("Initializing report generation...")
+    setProgress(progressPhases.INITIALIZING.progress)
+    setGenerationPhase(progressPhases.INITIALIZING.message)
 
     try {
-      await onSubmit(formData)
+      const response = await fetch('/api/reports', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          auditId,
+          ...formData
+        }),
+      })
+
+      if (!response.ok) throw new Error('Failed to start report generation')
+      if (!response.body) throw new Error('Response body is empty')
+
+      const reader = response.body.getReader()
+      const decoder = new TextDecoder()
+
+      while (true) {
+        const { done, value } = await reader.read()
+        if (done) break
+
+        const chunk = decoder.decode(value)
+        const lines = chunk.split('\n')
+
+        for (const line of lines) {
+          if (line.startsWith('data: ')) {
+            try {
+              const data = JSON.parse(line.slice(6))
+              
+              if (data.status === 'complete') {
+                setReportId(data.reportId)
+                setProgress(progressPhases.COMPLETE.progress)
+                setGenerationPhase(progressPhases.COMPLETE.message)
+                onReportGenerated?.(data.reportId)
+                toast({
+                  title: "Report Generated Successfully",
+                  description: "Your report is ready to view",
+                  action: (
+                    <ToastAction altText="View Report" onClick={() => handleViewReport(data.reportId)}>
+                      View Report
+                    </ToastAction>
+                  ),
+                })
+                return
+              }
+
+              if (data.phase) {
+                const phaseKey = data.phase.toUpperCase() as ProgressPhase
+                const phase = progressPhases[phaseKey]
+                if (phase) {
+                  setProgress(data.progress || phase.progress)
+                  setGenerationPhase(data.message || phase.message)
+                }
+              }
+            } catch (error) {
+              console.error('Error parsing progress data:', error)
+            }
+          }
+        }
+      }
     } catch (error) {
       console.error('Error submitting report:', error)
       toast({
@@ -147,6 +194,7 @@ export function CreateReportModal({
         description: "Failed to create report. Please try again.",
         variant: "destructive",
       })
+    } finally {
       setIsLoading(false)
     }
   }
@@ -158,10 +206,10 @@ export function CreateReportModal({
     setFormData((prev) => ({ ...prev, [name]: value }))
   }
 
-  const handleViewReport = () => {
-    if (reportId) {
+  const handleViewReport = (id: string) => {
+    if (id) {
+      onReportGenerated?.(id)
       onOpenChange(false)
-      router.push(`/audits/${auditId}?tab=reports&highlight=${reportId}`)
     }
   }
 
@@ -219,20 +267,19 @@ export function CreateReportModal({
             </div>
           ) : (
             <div className="space-y-6 py-8">
-              <div className="space-y-4">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    {progress < 100 ? (
-                      <Loader2 className="h-4 w-4 animate-spin" />
-                    ) : (
-                      <CheckCircle2 className="h-4 w-4 text-green-500" />
-                    )}
-                    <p className="text-sm font-medium">{generationPhase}</p>
+              <ProgressDisplay
+                phase={generationPhase}
+                progress={progress}
+                message={generationPhase}
+              />
+              {reportId && (
+                <div className="mt-4 p-4 bg-primary/5 rounded-lg border border-primary/10">
+                  <div className="flex items-center gap-2 text-sm text-primary">
+                    <FileText className="h-4 w-4" />
+                    <span>Report "{formData.title}" has been generated</span>
                   </div>
-                  <span className="text-sm text-muted-foreground">{Math.round(progress)}%</span>
                 </div>
-                <Progress value={progress} className="h-2" />
-              </div>
+              )}
             </div>
           )}
 
@@ -265,7 +312,7 @@ export function CreateReportModal({
             {reportId && (
               <Button
                 type="button"
-                onClick={handleViewReport}
+                onClick={() => handleViewReport(reportId)}
                 className="w-full"
               >
                 <FileText className="mr-2 h-4 w-4" />

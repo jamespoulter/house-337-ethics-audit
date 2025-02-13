@@ -22,7 +22,7 @@ export async function POST(req: Request) {
         try {
           // Initial progress update
           sendProgress(controller, {
-            phase: "initializing",
+            phase: "INITIALIZING",
             message: "Starting report generation...",
             progress: 5
           })
@@ -51,9 +51,9 @@ export async function POST(req: Request) {
 
           // Update progress - Fetching audit data
           sendProgress(controller, {
-            phase: "fetching",
-            message: "Fetching audit data...",
-            progress: 10
+            phase: "FETCHING_DATA",
+            message: "Gathering audit data and assessment results...",
+            progress: 15
           })
 
           const { data: auditData, error: auditError } = await supabase
@@ -104,11 +104,11 @@ export async function POST(req: Request) {
             return
           }
 
-          // Update progress - Processing audit data
+          // Update progress - Processing and analyzing data
           sendProgress(controller, {
-            phase: "processing",
-            message: "Processing audit data...",
-            progress: 20
+            phase: "ANALYZING",
+            message: "Analyzing ethical assessment results and interview data...",
+            progress: 30
           })
 
           const formattedAudit = {
@@ -138,11 +138,11 @@ export async function POST(req: Request) {
             }, {})
           }
 
-          // Update progress - Generating report
+          // Update progress - Starting report generation
           sendProgress(controller, {
-            phase: "generating",
-            message: "Generating report content...",
-            progress: 30
+            phase: "GENERATING",
+            message: "Creating comprehensive report content...",
+            progress: 60
           })
 
           const userPrompt = generateReportPrompt({
@@ -179,23 +179,22 @@ export async function POST(req: Request) {
               fullContent += text
               chunkCount++
               
-              // Calculate progress between 30% and 90%
-              const generationProgress = Math.min(90, 30 + (chunkCount / totalExpectedChunks * 60))
+              // Calculate progress between 60% and 90%
+              const generationProgress = Math.min(90, 60 + (chunkCount / totalExpectedChunks * 30))
               
-              // Send both the text chunk and the progress update
               sendProgress(controller, {
-                phase: "generating",
+                phase: "GENERATING",
                 text,
                 progress: generationProgress,
-                message: "Generating report content..."
+                message: "Creating comprehensive report content..."
               })
             }
           }
 
           // Update progress - Saving report
           sendProgress(controller, {
-            phase: "saving",
-            message: "Saving report...",
+            phase: "SAVING",
+            message: "Finalizing and saving report...",
             progress: 95
           })
 
@@ -226,9 +225,10 @@ export async function POST(req: Request) {
           } else {
             // Send completion message with report ID
             sendProgress(controller, {
+              phase: "COMPLETE",
               status: "complete",
               reportId: reportData.id,
-              message: "Report generation completed successfully",
+              message: "Report generation completed successfully!",
               progress: 100
             })
           }
@@ -250,19 +250,22 @@ export async function POST(req: Request) {
 
     return new Response(stream, {
       headers: {
-        "Content-Type": "text/event-stream",
-        "Cache-Control": "no-cache",
-        "Connection": "keep-alive",
+        'Content-Type': 'text/event-stream',
+        'Cache-Control': 'no-cache',
+        'Connection': 'keep-alive',
       },
     })
   } catch (error) {
-    console.error("Fatal error in report generation:", error)
-    return new NextResponse(
+    console.error("Error in POST handler:", error)
+    return new Response(
       JSON.stringify({ 
-        error: "Error generating report", 
-        details: error instanceof Error ? error.message : "Unknown error" 
-      }), 
-      { status: 500 }
+        error: "Failed to process request",
+        details: error instanceof Error ? error.message : "Unknown error"
+      }),
+      { 
+        status: 500,
+        headers: { 'Content-Type': 'application/json' }
+      }
     )
   }
 } 

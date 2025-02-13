@@ -17,7 +17,7 @@ import { Questionnaire } from "@/components/questionnaire"
 import { cn } from "@/lib/utils"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { Separator } from "@/components/ui/separator"
-import { ChevronRight, ClipboardList, Users, Network, FileText, Settings, BarChart, Loader2, Save, FileSpreadsheet } from "lucide-react"
+import { ChevronRight, ClipboardList, Users, Network, FileText, Settings, BarChart, Loader2, Save, FileSpreadsheet, Trash2 } from "lucide-react"
 import { getAuditById, updateAudit } from "@/lib/supabase"
 import { AuditWithDetails, EthicalAssessmentCategory, EthicalAssessmentResponse } from "@/lib/types"
 import { useUnsavedChanges } from "@/hooks/use-unsaved-changes"
@@ -27,6 +27,17 @@ import { CreateReportModal } from "@/components/create-report-modal"
 import { useCompletion } from 'ai/react'
 import { createClientComponentClient } from "@supabase/auth-helpers-nextjs"
 import { Database } from "@/lib/database.types"
+import { Checkbox } from "@/components/ui/checkbox"
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog"
 
 interface Question {
   id: string
@@ -165,6 +176,10 @@ export default function AuditDetail() {
   const supabase = createClientComponentClient<Database>()
   const searchParams = useSearchParams()
   const highlightedReportId = searchParams.get('highlight')
+  const [selectedReports, setSelectedReports] = useState<string[]>([])
+  const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false)
+  const [reportToDelete, setReportToDelete] = useState<string | null>(null)
+  const [isDeleting, setIsDeleting] = useState(false)
 
   // Add the useUnsavedChanges hook
   const { hasUnsavedChanges, setCurrentData } = useUnsavedChanges(audit)
@@ -595,6 +610,95 @@ export default function AuditDetail() {
     }
   }
 
+  const refreshReports = useCallback(async () => {
+    if (!id) return
+    
+    const { data: reportData, error } = await supabase
+      .from('reports')
+      .select('*')
+      .eq('audit_id', id)
+      .order('created_at', { ascending: false })
+
+    if (!error && reportData) {
+      setReports(reportData)
+      // Set the active tab to reports
+      setActiveTab("reports")
+      
+      // Get the most recent report and update the URL to highlight it
+      if (reportData.length > 0) {
+        const latestReport = reportData[0]
+        // Update the URL with the latest report ID
+        const newUrl = `/audits/${id}?tab=reports&highlight=${latestReport.id}`
+        // Replace the current URL without adding to history
+        window.history.replaceState({}, '', newUrl)
+      }
+    }
+  }, [id, supabase])
+
+  // Single report deletion
+  const handleDeleteReport = async (reportId: string) => {
+    try {
+      setIsDeleting(true)
+      const { error } = await supabase
+        .from('reports')
+        .delete()
+        .eq('id', reportId)
+
+      if (error) throw error
+
+      toast({
+        title: "Report Deleted",
+        description: "The report has been deleted successfully.",
+      })
+
+      await refreshReports()
+    } catch (error) {
+      console.error('Error deleting report:', error)
+      toast({
+        title: "Error",
+        description: "Failed to delete report. Please try again.",
+        variant: "destructive",
+      })
+    } finally {
+      setIsDeleting(false)
+      setReportToDelete(null)
+      setDeleteConfirmOpen(false)
+    }
+  }
+
+  // Bulk report deletion
+  const handleDeleteReports = async () => {
+    try {
+      if (selectedReports.length === 0) return
+      setIsDeleting(true)
+
+      const { error } = await supabase
+        .from('reports')
+        .delete()
+        .in('id', selectedReports)
+
+      if (error) throw error
+
+      toast({
+        title: "Reports Deleted",
+        description: `Successfully deleted ${selectedReports.length} report${selectedReports.length > 1 ? 's' : ''}.`,
+      })
+
+      await refreshReports()
+      setSelectedReports([])
+    } catch (error) {
+      console.error('Error deleting reports:', error)
+      toast({
+        title: "Error",
+        description: "Failed to delete reports. Please try again.",
+        variant: "destructive",
+      })
+    } finally {
+      setIsDeleting(false)
+      setDeleteConfirmOpen(false)
+    }
+  }
+
   if (loading || !audit) {
     return (
       <div className="flex items-center justify-center h-screen">
@@ -932,14 +1036,42 @@ export default function AuditDetail() {
               <Card className="overflow-hidden border-none shadow-md">
                 <CardHeader>
                   <div className="flex items-center justify-between">
-                    <CardTitle>Generated Reports</CardTitle>
-                    <Button 
-                      onClick={() => setIsReportModalOpen(true)}
-                      size="sm"
-                    >
-                      <FileText className="h-4 w-4 mr-2" />
-                      Create New Report
-                    </Button>
+                    <div className="flex items-center gap-4">
+                      <CardTitle>Generated Reports</CardTitle>
+                      {selectedReports.length > 0 && (
+                        <Badge variant="secondary">
+                          {selectedReports.length} selected
+                        </Badge>
+                      )}
+                    </div>
+                    <div className="flex items-center gap-2">
+                      {selectedReports.length > 0 ? (
+                        <>
+                          <Button
+                            onClick={() => setSelectedReports([])}
+                            variant="ghost"
+                            size="sm"
+                          >
+                            Deselect All
+                          </Button>
+                          <Button
+                            onClick={() => setDeleteConfirmOpen(true)}
+                            variant="destructive"
+                            size="sm"
+                          >
+                            Delete Selected
+                          </Button>
+                        </>
+                      ) : (
+                        <Button 
+                          onClick={() => setIsReportModalOpen(true)}
+                          size="sm"
+                        >
+                          <FileText className="h-4 w-4 mr-2" />
+                          Create New Report
+                        </Button>
+                      )}
+                    </div>
                   </div>
                 </CardHeader>
                 <CardContent className="p-6">
@@ -970,10 +1102,23 @@ export default function AuditDetail() {
                           )}
                         >
                           <div className="flex items-start gap-4">
-                            <FileText className={cn(
-                              "h-5 w-5 mt-1",
-                              report.id === highlightedReportId ? "text-primary animate-pulse" : "text-primary"
-                            )} />
+                            <div className="flex items-center gap-4">
+                              <Checkbox
+                                checked={selectedReports.includes(report.id)}
+                                onCheckedChange={(checked) => {
+                                  setSelectedReports(prev => 
+                                    checked 
+                                      ? [...prev, report.id]
+                                      : prev.filter(id => id !== report.id)
+                                  )
+                                }}
+                                aria-label={`Select report ${report.title}`}
+                              />
+                              <FileText className={cn(
+                                "h-5 w-5 mt-1",
+                                report.id === highlightedReportId ? "text-primary animate-pulse" : "text-primary"
+                              )} />
+                            </div>
                             <div>
                               <h4 className="font-medium">
                                 {report.title}
@@ -996,13 +1141,25 @@ export default function AuditDetail() {
                               </div>
                             </div>
                           </div>
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => router.push(`/reports/${report.id}`)}
-                          >
-                            View Report
-                          </Button>
+                          <div className="flex items-center gap-2">
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => router.push(`/reports/${report.id}`)}
+                            >
+                              View Report
+                            </Button>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => {
+                                setReportToDelete(report.id)
+                                setDeleteConfirmOpen(true)
+                              }}
+                            >
+                              <Trash2 className="h-4 w-4" />
+                            </Button>
+                          </div>
                         </div>
                       ))}
                     </div>
@@ -1019,8 +1176,61 @@ export default function AuditDetail() {
         onOpenChange={setIsReportModalOpen}
         onSubmit={handleCreateReport}
         isGenerating={isGenerating}
-        generatedContent={reportContent}
+        onReportGenerated={async (reportId) => {
+          await refreshReports()
+          // Set the active tab to reports
+          setActiveTab("reports")
+        }}
       />
+
+      {/* Confirmation Dialog */}
+      <AlertDialog open={deleteConfirmOpen} onOpenChange={setDeleteConfirmOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>
+              {reportToDelete 
+                ? "Delete Report"
+                : `Delete ${selectedReports.length} Reports`}
+            </AlertDialogTitle>
+            <AlertDialogDescription>
+              {reportToDelete
+                ? "Are you sure you want to delete this report? This action cannot be undone."
+                : `Are you sure you want to delete ${selectedReports.length} reports? This action cannot be undone.`}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel 
+              onClick={() => {
+                setDeleteConfirmOpen(false)
+                setReportToDelete(null)
+              }}
+              disabled={isDeleting}
+            >
+              Cancel
+            </AlertDialogCancel>
+            <AlertDialogAction
+              onClick={() => {
+                if (reportToDelete) {
+                  handleDeleteReport(reportToDelete)
+                } else {
+                  handleDeleteReports()
+                }
+              }}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              disabled={isDeleting}
+            >
+              {isDeleting ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Deleting...
+                </>
+              ) : (
+                'Delete'
+              )}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   )
 }
