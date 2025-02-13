@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { createClientComponentClient } from '@supabase/auth-helpers-nextjs'
 import { User } from '@supabase/supabase-js'
+import { Button } from './ui/button'
 
 export function NavigationMenu() {
   const [user, setUser] = useState<User | null>(null)
@@ -26,7 +27,13 @@ export function NavigationMenu() {
   }, [supabase.auth])
 
   if (!user) {
-    return null
+    return (
+      <Link href="/auth/login">
+        <Button variant="outline" className="text-white hover:text-[#FF0055] border-white hover:border-[#FF0055] transition-colors">
+          Login
+        </Button>
+      </Link>
+    )
   }
 
   return (
@@ -36,9 +43,6 @@ export function NavigationMenu() {
       </Link>
       <Link href="/audits" className="text-white hover:text-[#FF0055] transition-colors">
         Audits
-      </Link>
-      <Link href="/reports" className="text-white hover:text-[#FF0055] transition-colors">
-        Reports
       </Link>
       <Link href="/settings" className="text-white hover:text-[#FF0055] transition-colors">
         Settings

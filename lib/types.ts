@@ -25,9 +25,23 @@ export interface EthicalAssessmentCategory {
 
 export interface EthicalAssessmentResponse {
   id: string
-  category_id: string
+  audit_id: string
+  category_name: string
   question_id: string
   response: number | null
+  created_at: string
+  updated_at: string
+  ethical_assessment_questions?: {
+    id: string
+    category_name: string
+    question_text: string
+  }
+}
+
+export interface EthicalAssessmentQuestion {
+  id: string
+  category_name: string
+  question_text: string
   created_at: string
   updated_at: string
 }
@@ -58,4 +72,18 @@ export interface AuditWithDetails extends Audit {
   ethical_assessment_responses?: EthicalAssessmentResponse[]
   staff_interviews?: StaffInterview[]
   raci_matrix?: RACIMatrix[]
+}
+
+export interface Report {
+  id: string
+  audit_id: string
+  title: string
+  description: string
+  content: string
+  custom_instructions?: string
+  created_by: string
+  created_at: string
+  updated_at: string
+  status: 'draft' | 'completed' | 'archived'
+  version: number
 } 

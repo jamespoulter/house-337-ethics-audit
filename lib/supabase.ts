@@ -102,48 +102,33 @@ export async function getAudits() {
 
 export async function getAuditById(id: string): Promise<AuditWithDetails | null> {
   try {
-    // Get main audit data
+    // Get main audit data with all related information in a single query
     const { data: audit, error: auditError } = await supabase
       .from('audits')
-      .select('*')
+      .select(`
+        *,
+        ethical_assessment_categories (*),
+        ethical_assessment_responses (
+          *,
+          ethical_assessment_questions (*)
+        ),
+        raci_matrix (*),
+        staff_interviews (*)
+      `)
       .eq('id', id)
       .single()
 
-    if (auditError) throw auditError
+    if (auditError) {
+      console.error('Error fetching audit:', auditError)
+      throw auditError
+    }
 
-    // Get ethical assessment categories and responses
-    const { data: categories, error: categoriesError } = await supabase
-      .from('ethical_assessment_categories')
-      .select(`
-        *,
-        ethical_assessment_responses (*)
-      `)
-      .eq('audit_id', id)
+    if (!audit) {
+      console.error('No audit found with id:', id)
+      return null
+    }
 
-    if (categoriesError) throw categoriesError
-
-    // Get RACI matrix data
-    const { data: raciMatrix, error: raciError } = await supabase
-      .from('raci_matrix')
-      .select('*')
-      .eq('audit_id', id)
-
-    if (raciError) throw raciError
-
-    // Get staff interviews
-    const { data: interviews, error: interviewsError } = await supabase
-      .from('staff_interviews')
-      .select('*')
-      .eq('audit_id', id)
-
-    if (interviewsError) throw interviewsError
-
-    return {
-      ...audit,
-      ethical_assessment_categories: categories,
-      raci_matrix: raciMatrix,
-      staff_interviews: interviews,
-    } as AuditWithDetails
+    return audit as AuditWithDetails
   } catch (error) {
     console.error('Error in getAuditById:', error)
     return null
@@ -195,10 +180,12 @@ export async function updateAudit(id: string, audit: Partial<AuditWithDetails>) 
         .from('ethical_assessment_categories')
         .upsert(
           audit.ethical_assessment_categories.map(category => ({
-            ...category,
             audit_id: id,
+            category_name: category.category_name,
+            score: category.score,
             updated_at: new Date().toISOString()
-          }))
+          })),
+          { onConflict: 'audit_id,category_name' }
         );
 
       if (categoriesError) throw categoriesError;
@@ -206,19 +193,61 @@ export async function updateAudit(id: string, audit: Partial<AuditWithDetails>) 
 
     // Update ethical assessment responses if provided
     if (audit.ethical_assessment_responses) {
+      // First, get existing responses for this audit
+      const { data: existingResponses, error: fetchError } = await supabase
+        .from('ethical_assessment_responses')
+        .select('*')
+        .eq('audit_id', id);
+
+      if (fetchError) throw fetchError;
+
+      // Create a map of existing responses by question_id
+      const existingResponseMap = new Map(
+        existingResponses?.map(response => [response.question_id, response]) || []
+      );
+
+      // Prepare upsert data
+      const responsesToUpsert = audit.ethical_assessment_responses.map(response => {
+        const existing = existingResponseMap.get(response.question_id);
+        return {
+          id: existing?.id, // Use existing ID if available
+          audit_id: id,
+          category_name: response.category_name,
+          question_id: response.question_id,
+          response: response.response,
+          updated_at: new Date().toISOString()
+        };
+      });
+
+      // Perform upsert operation
       const { error: responsesError } = await supabase
         .from('ethical_assessment_responses')
-        .upsert(
-          audit.ethical_assessment_responses.map(response => ({
-            ...response,
-            updated_at: new Date().toISOString()
-          }))
-        );
+        .upsert(responsesToUpsert, {
+          onConflict: 'audit_id,question_id',
+          ignoreDuplicates: false
+        });
 
       if (responsesError) throw responsesError;
     }
 
-    return auditData;
+    // Fetch the updated audit with all related data
+    const { data: updatedAudit, error: fetchError } = await supabase
+      .from('audits')
+      .select(`
+        *,
+        ethical_assessment_categories (*),
+        ethical_assessment_responses (
+          *,
+          ethical_assessment_questions (*)
+        ),
+        raci_matrix (*),
+        staff_interviews (*)
+      `)
+      .eq('id', id)
+      .single();
+
+    if (fetchError) throw fetchError;
+    return updatedAudit;
   } catch (error) {
     console.error('Error in updateAudit:', error);
     throw error;
@@ -342,6 +371,19 @@ export async function batchUpdateResponses(
     handleSupabaseError(error)
     throw error
   }
+}
+
+export async function deleteInterview(interviewId: string) {
+  const { error } = await supabase
+    .from('interviews')
+    .delete()
+    .eq('id', interviewId);
+    
+  if (error) {
+    throw new Error(`Error deleting interview: ${error.message}`);
+  }
+  
+  return { success: true };
 }
 
 export type Audit = {
