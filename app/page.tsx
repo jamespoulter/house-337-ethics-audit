@@ -194,6 +194,100 @@ export default function Home() {
         </div>
       </section>
 
+      {/* Platform Preview Section - Showcase of the platform's interface */}
+      <section className="py-24 lg:py-32 bg-white border-t border-gray-100">
+        <div className="max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="grid gap-16">
+            <div className="space-y-4 max-w-3xl">
+              <h2 className="text-4xl font-bold tracking-tight sm:text-5xl text-black">
+                Platform Overview
+              </h2>
+              <p className="text-xl text-gray-600">
+                Experience our comprehensive AI ethics audit platform through an intuitive and powerful interface.
+              </p>
+            </div>
+            
+            <div className="grid gap-12 lg:grid-cols-2">
+              {/* Screen 1 - Dashboard Overview */}
+              <div className="space-y-6">
+                <div className="relative aspect-video overflow-hidden rounded-xl border border-gray-200 shadow-lg">
+                  <Image
+                    src={images.betaScreens.screen1.src}
+                    alt={images.betaScreens.screen1.alt}
+                    width={images.betaScreens.screen1.width}
+                    height={images.betaScreens.screen1.height}
+                    className="object-cover"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <h3 className="text-2xl font-bold text-black">Intuitive Dashboard</h3>
+                  <p className="text-lg text-gray-600">
+                    Get a comprehensive overview of your AI ethics audits, track progress, and manage multiple assessments from a central dashboard.
+                  </p>
+                </div>
+              </div>
+
+              {/* Screen 2 - Assessment Interface */}
+              <div className="space-y-6">
+                <div className="relative aspect-video overflow-hidden rounded-xl border border-gray-200 shadow-lg">
+                  <Image
+                    src={images.betaScreens.screen2.src}
+                    alt={images.betaScreens.screen2.alt}
+                    width={images.betaScreens.screen2.width}
+                    height={images.betaScreens.screen2.height}
+                    className="object-cover"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <h3 className="text-2xl font-bold text-black">Detailed Assessments</h3>
+                  <p className="text-lg text-gray-600">
+                    Conduct thorough ethical evaluations using our structured assessment framework, covering all aspects of AI implementation.
+                  </p>
+                </div>
+              </div>
+
+              {/* Screen 3 - Stakeholder Management */}
+              <div className="space-y-6">
+                <div className="relative aspect-video overflow-hidden rounded-xl border border-gray-200 shadow-lg">
+                  <Image
+                    src={images.betaScreens.screen3.src}
+                    alt={images.betaScreens.screen3.alt}
+                    width={images.betaScreens.screen3.width}
+                    height={images.betaScreens.screen3.height}
+                    className="object-cover"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <h3 className="text-2xl font-bold text-black">Stakeholder Engagement</h3>
+                  <p className="text-lg text-gray-600">
+                    Manage stakeholder interviews, collect responses, and track participation through our collaborative interface.
+                  </p>
+                </div>
+              </div>
+
+              {/* Screen 4 - Reporting & Analytics */}
+              <div className="space-y-6">
+                <div className="relative aspect-video overflow-hidden rounded-xl border border-gray-200 shadow-lg">
+                  <Image
+                    src={images.betaScreens.screen4.src}
+                    alt={images.betaScreens.screen4.alt}
+                    width={images.betaScreens.screen4.width}
+                    height={images.betaScreens.screen4.height}
+                    className="object-cover"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <h3 className="text-2xl font-bold text-black">Comprehensive Reporting</h3>
+                  <p className="text-lg text-gray-600">
+                    Generate detailed reports with actionable insights, scoring breakdowns, and recommendations for ethical AI implementation.
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* Framework and Trust Indicators Section */}
       <section className="relative py-32 lg:py-40 bg-white border-t border-gray-100">
         <div className="max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8">
@@ -270,6 +364,95 @@ export default function Home() {
                   className="rounded-lg transition-all duration-300"
                   priority
                 />
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* AI Ethics Consultants Section */}
+      <section className="py-24 lg:py-32 bg-white border-t border-gray-100">
+        <div className="max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="grid gap-16">
+            <div className="space-y-4 max-w-3xl">
+              <h2 className="text-4xl font-bold tracking-tight sm:text-5xl text-black">
+                Meet Our AI Ethics Experts
+              </h2>
+              <p className="text-xl text-gray-600">
+                Led by industry pioneers in AI innovation and strategy, our team brings deep expertise in ethical AI implementation.
+              </p>
+            </div>
+
+            <div className="grid gap-12 lg:grid-cols-2">
+              {/* James Poulter */}
+              <div className="space-y-8">
+                <div className="space-y-4">
+                  <div className="aspect-[4/3] relative overflow-hidden rounded-xl border border-gray-200">
+                    <Image
+                      src={images.consultants.jamesPoulter2025.src}
+                      alt={images.consultants.jamesPoulter2025.alt}
+                      width={images.consultants.jamesPoulter2025.width}
+                      height={images.consultants.jamesPoulter2025.height}
+                      className="object-cover"
+                      priority
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
+                    <div className="absolute bottom-0 left-0 right-0 p-8">
+                      <h3 className="text-2xl font-bold text-white">James Poulter</h3>
+                      <p className="text-lg text-gray-200">Head of AI and Innovation</p>
+                    </div>
+                  </div>
+                </div>
+                <div className="space-y-4">
+                  <blockquote className="text-xl italic text-gray-700 border-l-4 border-[#FF0055] pl-6">
+                    "As AI continues to reshape the business landscape, ethical implementation isn't just a nice-to-have – it's a fundamental requirement for building lasting customer trust and sustainable innovation."
+                  </blockquote>
+                  <Link 
+                    href="https://www.linkedin.com/in/jamespoulter"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center space-x-2 text-[#FF0055] hover:text-[#FF0055]/80 transition-colors"
+                  >
+                    <span className="border-b border-[#FF0055]">Connect on LinkedIn</span>
+                    <ChevronRight className="h-4 w-4" />
+                  </Link>
+                </div>
+              </div>
+
+              {/* Susan Westwater */}
+              <div className="space-y-8">
+                <div className="space-y-4">
+                  <div className="aspect-[4/3] relative overflow-hidden rounded-xl border border-gray-200">
+                    <Image
+                      src={images.consultants.susanWestwater.src}
+                      alt={images.consultants.susanWestwater.alt}
+                      width={images.consultants.susanWestwater.width}
+                      height={images.consultants.susanWestwater.height}
+                      className="object-cover"
+                      priority
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
+                    <div className="absolute bottom-0 left-0 right-0 p-8">
+                      <h3 className="text-2xl font-bold text-white">Susan Westwater</h3>
+                      <p className="text-lg text-gray-200">Strategy Director of AI</p>
+                      <p className="text-base text-gray-300 mt-1">Author of "Voice Strategy"</p>
+                    </div>
+                  </div>
+                </div>
+                <div className="space-y-4">
+                  <blockquote className="text-xl italic text-gray-700 border-l-4 border-[#FF0055] pl-6">
+                    "Voice and AI technologies are transforming how brands connect with their audiences. Success lies not just in implementation, but in ensuring these interactions are ethical, transparent, and truly valuable for users."
+                  </blockquote>
+                  <Link 
+                    href="https://www.linkedin.com/in/susanwestwater"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center space-x-2 text-[#FF0055] hover:text-[#FF0055]/80 transition-colors"
+                  >
+                    <span className="border-b border-[#FF0055]">Connect on LinkedIn</span>
+                    <ChevronRight className="h-4 w-4" />
+                  </Link>
+                </div>
               </div>
             </div>
           </div>

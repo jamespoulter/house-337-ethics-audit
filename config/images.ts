@@ -14,6 +14,52 @@ export const images = {
     width: 300,
     height: 90,
   },
+  consultants: {
+    jamesPoulter: {
+      src: `${STORAGE_URL}/images/James-Poulter.jpeg`,
+      alt: "James Poulter - Head of AI and Innovation",
+      width: 800,
+      height: 600,
+    },
+    jamesPoulter2025: {
+      src: `${STORAGE_URL}/images/jp-2025.jpeg`,
+      alt: "James Poulter - Head of AI and Innovation",
+      width: 800,
+      height: 600,
+    },
+    susanWestwater: {
+      src: `${STORAGE_URL}/images/Susan-Westwater.jpg`,
+      alt: "Susan Westwater - Strategy Director of AI",
+      width: 800,
+      height: 600,
+    },
+  },
+  betaScreens: {
+    screen1: {
+      src: `${STORAGE_URL}/images/beta screen 1.png`,
+      alt: "Beta Screen 1",
+      width: 1920,
+      height: 1080,
+    },
+    screen2: {
+      src: `${STORAGE_URL}/images/beta screen 2.png`,
+      alt: "Beta Screen 2",
+      width: 1920,
+      height: 1080,
+    },
+    screen3: {
+      src: `${STORAGE_URL}/images/beta screen 3.png`,
+      alt: "Beta Screen 3",
+      width: 1920,
+      height: 1080,
+    },
+    screen4: {
+      src: `${STORAGE_URL}/images/beta screen 4.png`,
+      alt: "Beta Screen 4",
+      width: 1920,
+      height: 1080,
+    },
+  },
   framework: {
     src: `${STORAGE_URL}/framework/ethical-ai-framework.png`,
     alt: "AI Ethics Framework",
