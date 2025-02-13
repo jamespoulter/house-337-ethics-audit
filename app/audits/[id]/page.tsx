@@ -527,8 +527,31 @@ export default function AuditDetail() {
       })
     } catch (error) {
       toast({
-        title: "Error saving changes",
+        title: "Error",
         description: "Failed to save your changes. Please try again.",
+        variant: "destructive",
+      })
+    } finally {
+      setIsSaving(false)
+    }
+  }
+
+  const handleStatusChange = async () => {
+    if (!audit) return
+    const newStatus = audit.status === "Completed" ? "In Progress" : "Completed"
+    try {
+      setIsSaving(true)
+      await updateAudit(audit.id, { ...audit, status: newStatus })
+      setAudit(prev => prev ? { ...prev, status: newStatus } : null)
+      setLastSaved(new Date())
+      toast({
+        title: "Status Updated",
+        description: `Audit status changed to ${newStatus}`,
+      })
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to update audit status. Please try again.",
         variant: "destructive",
       })
     } finally {
@@ -603,8 +626,8 @@ export default function AuditDetail() {
     <div className="flex h-screen overflow-hidden bg-background">
       {/* Sidebar */}
       <div className="w-80 border-r bg-card">
-        <div className="flex h-16 items-center justify-between border-b px-6">
-          <h2 className="text-lg font-semibold tracking-tight">Audit Navigation</h2>
+        <div className="flex h-16 items-center px-6 border-b">
+          <h2 className="text-lg font-semibold tracking-tight">Navigation</h2>
         </div>
         <ScrollArea className="h-[calc(100vh-4rem)] px-4 py-6">
           <div className="space-y-2">
@@ -638,19 +661,36 @@ export default function AuditDetail() {
 
       {/* Main Content */}
       <div className="flex-1 overflow-hidden">
-        <div className="flex h-16 items-center justify-between border-b bg-card/50">
+        <div className="flex h-20 items-center justify-between border-b bg-card/50">
           <div className="max-w-7xl w-full mx-auto px-8 flex items-center justify-between">
-            <div className="flex items-center gap-4">
-              <h1 className="text-xl font-semibold tracking-tight">AI Ethics Audit for {audit.name ?? 'Untitled'}</h1>
-              <Badge variant="outline" className="font-medium">
-                {audit.status ?? 'In Progress'}
-              </Badge>
+            <div className="flex flex-col">
+              <div className="flex items-center gap-4">
+                <h1 className="text-xl font-semibold tracking-tight">{audit.name ?? 'Untitled'}</h1>
+                <div className="flex items-center gap-2">
+                  <Badge variant="outline" className="font-medium">
+                    {audit.status ?? 'In Progress'}
+                  </Badge>
+                  <Button 
+                    variant="ghost" 
+                    size="sm"
+                    onClick={handleStatusChange}
+                    disabled={isSaving}
+                  >
+                    {audit.status === "Completed" ? "Mark as In Progress" : "Mark as Completed"}
+                  </Button>
+                </div>
+              </div>
+              <div className="flex items-center gap-2 mt-1.5">
+                <span className="text-sm text-muted-foreground">{audit.organization}</span>
+                <span className="text-sm text-muted-foreground">•</span>
+                <span className="text-sm text-muted-foreground">Created: {new Date(audit.created_at).toLocaleDateString()}</span>
+              </div>
             </div>
             <div className="flex items-center gap-8">
               <div className="flex flex-col items-end">
                 <span className="text-sm text-muted-foreground">Overall Ethics Score</span>
                 <span className={cn(
-                  "mt-1 px-3 py-1 rounded-full text-sm font-medium",
+                  "mt-1.5 px-3 py-1 rounded-full text-sm font-medium",
                   (audit.overall_score ?? 0) >= 90 ? "bg-green-100 text-green-700" :
                   (audit.overall_score ?? 0) >= 70 ? "bg-yellow-100 text-yellow-700" :
                   "bg-red-100 text-red-700"
@@ -676,14 +716,6 @@ export default function AuditDetail() {
                       {hasUnsavedChanges ? "Save Changes" : "Saved"}
                     </>
                   )}
-                </Button>
-                <Button 
-                  onClick={() => setIsReportModalOpen(true)}
-                  variant="secondary"
-                  className="min-w-[120px]"
-                >
-                  <FileText className="mr-2 h-4 w-4" />
-                  Create Report
                 </Button>
                 {lastSaved && (
                   <p className="text-sm text-muted-foreground whitespace-nowrap">
